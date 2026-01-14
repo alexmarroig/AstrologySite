@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, time
 import os
 from typing import Iterable
 
@@ -76,6 +76,28 @@ def _calc_body(jd_ut: float, body: int) -> EphemerisResult:
     return EphemerisResult(longitude=data[0], latitude=data[1], speed=data[3])
 
 
+def _format_birth_time(value: time | str) -> str:
+    if hasattr(value, "strftime"):
+        return value.strftime("%H:%M:%S")
+    return str(value)
+
+
+def _format_utc_datetime(value: datetime) -> str:
+    return value.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _normalize_cusps(cusps: list[float]) -> list[float]:
+    if len(cusps) == 13:
+        normalized = cusps[1:13]
+    elif len(cusps) >= 12:
+        normalized = cusps[:12]
+    else:
+        normalized = list(cusps)
+        fill_value = normalized[-1] if normalized else 0.0
+        normalized.extend([fill_value] * (12 - len(normalized)))
+    return normalized
+
+
 def _mock_response(payload: NatalChartRequest) -> NatalChartResponse:
     sample_points = ChartPoints(
         asc=SignPosition(sign="Áries", degree=10, minute=20),
@@ -85,9 +107,9 @@ def _mock_response(payload: NatalChartRequest) -> NatalChartResponse:
         full_name=payload.full_name,
         birth_place=payload.birth_place,
         birth_date=str(payload.birth_date),
-        birth_time=str(payload.birth_time),
+        birth_time=_format_birth_time(payload.birth_time),
         timezone="UTC",
-        utc_datetime=f"{payload.birth_date}T{payload.birth_time}:00Z",
+        utc_datetime=f"{payload.birth_date}T{_format_birth_time(payload.birth_time)}Z",
         latitude=0.0,
         longitude=0.0,
         zodiac=payload.zodiac,
@@ -151,11 +173,12 @@ def calculate_natal_chart(payload: NatalChartRequest) -> NatalChartResponse:
     ephemeris_flags = _setup_ephemeris(payload.zodiac, payload.sidereal_mode)
 
     cusps, ascmc = calculate_houses(jd_ut, lat, lon, payload.house_system)
+    normalized_cusps = _normalize_cusps(cusps)
     asc_position = to_sign_position(ascmc[0])
     mc_position = to_sign_position(ascmc[1])
 
     houses = []
-    for idx, cusp in enumerate(cusps[:12], start=1):
+    for idx, cusp in enumerate(normalized_cusps, start=1):
         sign_pos = to_sign_position(cusp)
         houses.append(
             HouseCusp(
@@ -172,7 +195,7 @@ def calculate_natal_chart(payload: NatalChartRequest) -> NatalChartResponse:
     for name, body in PLANETS.items():
         result = _calc_body(jd_ut, body)
         sign_pos = to_sign_position(result.longitude)
-        house_number = _resolve_house(result.longitude, cusps)
+        house_number = _resolve_house(result.longitude, normalized_cusps)
         planets.append(
             PlanetPosition(
                 name=name,
@@ -209,11 +232,11 @@ def calculate_natal_chart(payload: NatalChartRequest) -> NatalChartResponse:
         full_name=payload.full_name,
         birth_place=normalized_place,
         birth_date=str(payload.birth_date),
-        birth_time=str(payload.birth_time),
+        birth_time=_format_birth_time(payload.birth_time),
         timezone=timezone_name,
-        utc_datetime=utc_dt.isoformat().replace("+00:00", "Z"),
-        latitude=lat,
-        longitude=lon,
+        utc_datetime=_format_utc_datetime(utc_dt),
+        latitude=round(lat, 6),
+        longitude=round(lon, 6),
         zodiac=payload.zodiac,
         house_system=payload.house_system,
         sidereal_mode=payload.sidereal_mode,
