@@ -1,0 +1,181 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AstroLumen API",
+    "version": "1.0.0",
+    "description": "Backend para cálculo de mapa natal com Swiss Ephemeris."
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chart/natal": {
+      "post": {
+        "summary": "Generate natal chart",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/NatalChartRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Natal chart",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/NatalChartResponse"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NatalChartRequest": {
+        "type": "object",
+        "required": ["full_name", "birth_date", "birth_time", "birth_place"],
+        "properties": {
+          "full_name": {"type": "string"},
+          "birth_date": {"type": "string", "format": "date"},
+          "birth_time": {"type": "string", "format": "time"},
+          "birth_place": {"type": "string"},
+          "language": {"type": "string", "enum": ["pt-BR", "en"], "default": "pt-BR"},
+          "house_system": {"type": "string", "enum": ["P", "K", "W", "O", "R", "C"], "default": "P"},
+          "zodiac": {"type": "string", "enum": ["tropical", "sidereal"], "default": "tropical"},
+          "sidereal_mode": {"type": "string"},
+          "aspects": {
+            "type": "object",
+            "properties": {
+              "orbs": {
+                "type": "object",
+                "properties": {
+                  "conjunction": {"type": "number", "default": 8},
+                  "opposition": {"type": "number", "default": 8},
+                  "square": {"type": "number", "default": 6},
+                  "trine": {"type": "number", "default": 6},
+                  "sextile": {"type": "number", "default": 4}
+                }
+              }
+            }
+          }
+        }
+      },
+      "NatalChartResponse": {
+        "type": "object",
+        "properties": {
+          "metadata": {"$ref": "#/components/schemas/ChartMetadata"},
+          "points": {"$ref": "#/components/schemas/ChartPoints"},
+          "houses": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/HouseCusp"}
+          },
+          "planets": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/PlanetPosition"}
+          },
+          "aspects": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/AspectEntry"}
+          },
+          "summary": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "ChartMetadata": {
+        "type": "object",
+        "properties": {
+          "full_name": {"type": "string"},
+          "birth_place": {"type": "string"},
+          "birth_date": {"type": "string"},
+          "birth_time": {"type": "string"},
+          "timezone": {"type": "string"},
+          "utc_datetime": {"type": "string"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "zodiac": {"type": "string"},
+          "house_system": {"type": "string"},
+          "sidereal_mode": {"type": "string"},
+          "ephemeris_flags": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "ChartPoints": {
+        "type": "object",
+        "properties": {
+          "asc": {"$ref": "#/components/schemas/SignPosition"},
+          "mc": {"$ref": "#/components/schemas/SignPosition"},
+          "vertex": {"$ref": "#/components/schemas/SignPosition"},
+          "fortune": {"$ref": "#/components/schemas/SignPosition"}
+        }
+      },
+      "SignPosition": {
+        "type": "object",
+        "properties": {
+          "sign": {"type": "string"},
+          "degree": {"type": "integer"},
+          "minute": {"type": "integer"}
+        }
+      },
+      "HouseCusp": {
+        "type": "object",
+        "properties": {
+          "index": {"type": "integer"},
+          "longitude": {"type": "number"},
+          "sign": {"type": "string"},
+          "degree": {"type": "integer"},
+          "minute": {"type": "integer"}
+        }
+      },
+      "PlanetPosition": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "longitude": {"type": "number"},
+          "latitude": {"type": "number"},
+          "speed": {"type": "number"},
+          "sign": {"type": "string"},
+          "degree": {"type": "integer"},
+          "minute": {"type": "integer"},
+          "house": {"type": "integer"},
+          "retrograde": {"type": "boolean"}
+        }
+      },
+      "AspectEntry": {
+        "type": "object",
+        "properties": {
+          "planet1": {"type": "string"},
+          "planet2": {"type": "string"},
+          "type": {"type": "string"},
+          "exact_angle": {"type": "number"},
+          "orb": {"type": "number"},
+          "applying": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
