@@ -60,13 +60,15 @@ def _setup_ephemeris(zodiac: str, sidereal_mode: str | None) -> list[str]:
         swe.set_ephe_path(settings.ephemeris_path)
         flags.append(f"EPHE_PATH={settings.ephemeris_path}")
     if zodiac == "sidereal":
-        mode = SIDEREAL_MODES.get(sidereal_mode or "LAHIRI")
+        mode_key = (sidereal_mode or "LAHIRI").upper()
+        mode = SIDEREAL_MODES.get(mode_key)
         if mode is None:
-            raise ValueError("sidereal_mode inválido")
+            raise ValueError(
+                "sidereal_mode inválido. Use: FAGAN_BRADLEY, LAHIRI, KRISHNAMURTI ou RAMAN."
+            )
         swe.set_sid_mode(mode)
-        flags.append(f"SIDEREAL_MODE={sidereal_mode or 'LAHIRI'}")
-    else:
-        swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY, 0, 0)
+        flags.append(f"SIDEREAL_MODE={mode_key}")
+    elif zodiac == "tropical":
         flags.append("TROPICAL")
     return flags
 
