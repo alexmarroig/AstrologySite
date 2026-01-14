@@ -56,9 +56,12 @@ class EphemerisResult:
 
 def _setup_ephemeris(zodiac: str, sidereal_mode: str | None) -> list[str]:
     flags: list[str] = []
-    if settings.ephemeris_path:
-        swe.set_ephe_path(settings.ephemeris_path)
-        flags.append(f"EPHE_PATH={settings.ephemeris_path}")
+    ephemeris_path = os.getenv("ASTRO_EPHEMERIS_PATH") or settings.ephemeris_path
+    if ephemeris_path:
+        swe.set_ephe_path(ephemeris_path)
+        flags.append(f"EPHE_PATH={ephemeris_path}")
+    else:
+        flags.append("DEFAULT_EPHE")
     if zodiac == "sidereal":
         mode_key = (sidereal_mode or "LAHIRI").upper()
         mode = SIDEREAL_MODES.get(mode_key)
