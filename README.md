@@ -28,6 +28,7 @@ uvicorn app.main:app --reload
 | `ASTRO_RATE_LIMIT_REQUESTS` | Número de requisições por janela | `30` |
 | `ASTRO_RATE_LIMIT_WINDOW_SECONDS` | Janela em segundos | `60` |
 | `ASTRO_GEOCODE_USER_AGENT` | User agent para Nominatim | `astrolumen-api` |
+| `ASTRO_CORS_ORIGINS` | Lista CSV de origens permitidas no CORS | `http://localhost:5173` |
 
 ## Endpoints
 

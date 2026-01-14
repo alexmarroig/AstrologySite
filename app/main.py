@@ -4,6 +4,7 @@ import logging
 from typing import Any
 
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import router as api_router
@@ -19,6 +20,13 @@ app = FastAPI(
     title="AstroLumen API",
     version="1.0.0",
     description="Backend para cálculo de mapa natal com Swiss Ephemeris.",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
