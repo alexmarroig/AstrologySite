@@ -66,7 +66,6 @@ def _setup_ephemeris(zodiac: str, sidereal_mode: str | None) -> list[str]:
         swe.set_sid_mode(mode)
         flags.append(f"SIDEREAL_MODE={sidereal_mode or 'LAHIRI'}")
     else:
-        swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY, 0, 0)
         flags.append("TROPICAL")
     return flags
 
