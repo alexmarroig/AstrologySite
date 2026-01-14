@@ -26,6 +26,8 @@ class Settings(BaseSettings):
             origins = [origin.strip() for origin in value.split(",")]
             return [origin for origin in origins if origin]
         return value
+    geocode_timeout: float = 10.0
+    geocode_min_delay_seconds: float = 1.0
 
 
 @lru_cache(maxsize=1)
