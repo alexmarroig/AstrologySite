@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     rate_limit_requests: int = 30
     rate_limit_window_seconds: int = 60
     geocode_user_agent: str = "astrolumen-api"
+    geocode_timeout: float = 10.0
+    geocode_min_delay_seconds: float = 1.0
 
 
 @lru_cache(maxsize=1)
