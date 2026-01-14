@@ -35,7 +35,8 @@ def calculate_aspects(
     results: list[AspectResult] = []
     for i, body1 in enumerate(bodies):
         for body2 in bodies[i + 1 :]:
-            separation = _normalize_angle(abs(body1["longitude"] - body2["longitude"]))
+            relative_longitude = (body1["longitude"] - body2["longitude"]) % 360
+            separation = _normalize_angle(relative_longitude)
             for aspect_name, aspect_angle in ASPECTS.items():
                 orb_allowed = orbs.get(aspect_name)
                 if orb_allowed is None:
@@ -45,7 +46,23 @@ def calculate_aspects(
                     relative_speed = body1["speed"] - body2["speed"]
                     applying = None
                     if relative_speed != 0:
-                        applying = (separation - aspect_angle) * relative_speed < 0
+                        candidates = [
+                            aspect_angle,
+                            (360 - aspect_angle) % 360,
+                        ]
+                        target = min(
+                            candidates,
+                            key=lambda angle: _normalize_angle(relative_longitude - angle),
+                        )
+                        forward_distance = (target - relative_longitude) % 360
+                        backward_distance = (relative_longitude - target) % 360
+                        min_distance = min(forward_distance, backward_distance)
+                        if min_distance == 0:
+                            applying = False
+                        elif relative_speed > 0:
+                            applying = forward_distance == min_distance
+                        else:
+                            applying = backward_distance == min_distance
                     results.append(
                         AspectResult(
                             planet1=body1["name"],
