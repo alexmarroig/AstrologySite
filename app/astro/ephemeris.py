@@ -22,7 +22,7 @@ from app.astro.geocode import geocode_place
 from app.astro.houses import calculate_houses
 from app.astro.timezone import local_to_utc, resolve_timezone
 from app.core.config import settings
-from app.utils.signs import to_sign_position
+from app.utils.signs import describe_sign, to_sign_position
 
 PLANETS = {
     "Sun": swe.SUN,
@@ -149,7 +149,9 @@ def _mock_response(payload: NatalChartRequest) -> NatalChartResponse:
             applying=True,
         )
     ]
-    summary = ["Sol em Áries", "Ascendente em Áries", "Lua em Touro"]
+    summary = _build_summary(
+        planets, sample_points.asc, sample_points.mc, payload.language
+    )
     return NatalChartResponse(
         metadata=metadata,
         points=sample_points,
@@ -291,19 +293,41 @@ def _build_summary(
 ) -> list[str]:
     sun = next((p for p in planets if p.name == "Sun"), None)
     moon = next((p for p in planets if p.name == "Moon"), None)
+    venus = next((p for p in planets if p.name == "Venus"), None)
+    mars = next((p for p in planets if p.name == "Mars"), None)
     summary = []
     if language == "pt-BR":
         if sun:
-            summary.append(f"Sol em {sun.sign}")
+            sun_label, sun_element, sun_modality = describe_sign(sun.sign, language)
+            summary.append(f"Sol em {sun_label} ({sun_element}, {sun_modality})")
         if moon:
-            summary.append(f"Lua em {moon.sign}")
-        summary.append(f"Ascendente em {asc.sign}")
-        summary.append(f"MC em {mc.sign}")
+            moon_label, moon_element, moon_modality = describe_sign(moon.sign, language)
+            summary.append(f"Lua em {moon_label} ({moon_element}, {moon_modality})")
+        asc_label, asc_element, asc_modality = describe_sign(asc.sign, language)
+        summary.append(f"Ascendente em {asc_label} ({asc_element}, {asc_modality})")
+        if venus:
+            venus_label, _, _ = describe_sign(venus.sign, language)
+            summary.append(f"Vênus em {venus_label}")
+        if mars:
+            mars_label, _, _ = describe_sign(mars.sign, language)
+            summary.append(f"Marte em {mars_label}")
+        mc_label, _, _ = describe_sign(mc.sign, language)
+        summary.append(f"MC em {mc_label}")
     else:
         if sun:
-            summary.append(f"Sun in {sun.sign}")
+            sun_label, sun_element, sun_modality = describe_sign(sun.sign, language)
+            summary.append(f"Sun in {sun_label} ({sun_element}, {sun_modality})")
         if moon:
-            summary.append(f"Moon in {moon.sign}")
-        summary.append(f"Ascendant in {asc.sign}")
-        summary.append(f"MC in {mc.sign}")
+            moon_label, moon_element, moon_modality = describe_sign(moon.sign, language)
+            summary.append(f"Moon in {moon_label} ({moon_element}, {moon_modality})")
+        asc_label, asc_element, asc_modality = describe_sign(asc.sign, language)
+        summary.append(f"Ascendant in {asc_label} ({asc_element}, {asc_modality})")
+        if venus:
+            venus_label, _, _ = describe_sign(venus.sign, language)
+            summary.append(f"Venus in {venus_label}")
+        if mars:
+            mars_label, _, _ = describe_sign(mars.sign, language)
+            summary.append(f"Mars in {mars_label}")
+        mc_label, _, _ = describe_sign(mc.sign, language)
+        summary.append(f"MC in {mc_label}")
     return summary
