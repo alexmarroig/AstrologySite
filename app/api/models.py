@@ -35,6 +35,28 @@ class NatalChartRequest(BaseModel):
         return value.strip()
 
 
+class SolarReturnRequest(NatalChartRequest):
+    target_year: int = Field(..., ge=1800, le=2200)
+
+
+class ProgressionRequest(NatalChartRequest):
+    target_date: date
+
+
+class LunationRequest(BaseModel):
+    reference_date: date
+    phase: Literal["new", "full"] = "new"
+    language: Literal["pt-BR", "en"] = "pt-BR"
+
+
+class ReportRequest(NatalChartRequest):
+    format: Literal["rtf"] = "rtf"
+
+
+class AIInterpretationRequest(NatalChartRequest):
+    focus: Literal["general", "relationships", "career"] = "general"
+
+
 class SignPosition(BaseModel):
     sign: str
     degree: int
@@ -100,3 +122,18 @@ class NatalChartResponse(BaseModel):
     planets: list[PlanetPosition]
     aspects: list[AspectEntry]
     summary: list[str]
+
+
+class LunationResponse(BaseModel):
+    phase: str
+    utc_datetime: str
+    longitude_sun: float
+    longitude_moon: float
+    summary: str
+
+
+class AIInterpretationResponse(BaseModel):
+    metadata: ChartMetadata
+    focus: str
+    highlights: list[str]
+    interpretation: list[str]

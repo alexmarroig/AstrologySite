@@ -1,28 +1,34 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import os
-from typing import Iterable
+from typing import Callable, Iterable
 
 import swisseph as swe
 
 from app.api.models import (
+    AIInterpretationRequest,
+    AIInterpretationResponse,
     AspectEntry,
     ChartMetadata,
     ChartPoints,
     HouseCusp,
+    LunationRequest,
+    LunationResponse,
     NatalChartRequest,
     NatalChartResponse,
     PlanetPosition,
+    ProgressionRequest,
     SignPosition,
+    SolarReturnRequest,
 )
 from app.astro.aspects import calculate_aspects
 from app.astro.geocode import geocode_place
 from app.astro.houses import calculate_houses
 from app.astro.timezone import local_to_utc, resolve_timezone
 from app.core.config import settings
-from app.utils.signs import to_sign_position
+from app.utils.signs import describe_sign, to_sign_position
 
 PLANETS = {
     "Sun": swe.SUN,
@@ -79,6 +85,65 @@ def _setup_ephemeris(zodiac: str, sidereal_mode: str | None) -> list[str]:
 def _calc_body(jd_ut: float, body: int) -> EphemerisResult:
     data, _ = swe.calc_ut(jd_ut, body)
     return EphemerisResult(longitude=data[0], latitude=data[1], speed=data[3])
+
+
+def _angle_diff(value: float, target: float) -> float:
+    return (value - target + 180) % 360 - 180
+
+
+def _julian_day(value: datetime) -> float:
+    return swe.julday(
+        value.year,
+        value.month,
+        value.day,
+        value.hour + value.minute / 60 + value.second / 3600,
+    )
+
+
+def _sun_longitude(value: datetime) -> float:
+    jd_ut = _julian_day(value)
+    return _calc_body(jd_ut, swe.SUN).longitude
+
+
+def _moon_longitude(value: datetime) -> float:
+    jd_ut = _julian_day(value)
+    return _calc_body(jd_ut, swe.MOON).longitude
+
+
+def _find_event_time(
+    start: datetime,
+    end: datetime,
+    angle_fn: Callable[[datetime], float],
+    target: float,
+) -> datetime:
+    step = timedelta(hours=6)
+    candidate = start
+    best_time = start
+    best_delta = abs(_angle_diff(angle_fn(start), target))
+    last_value = _angle_diff(angle_fn(start), target)
+    while candidate <= end:
+        current = _angle_diff(angle_fn(candidate), target)
+        if abs(current) < best_delta:
+            best_delta = abs(current)
+            best_time = candidate
+        if current == 0 or (current > 0 > last_value) or (current < 0 < last_value):
+            low = candidate - step
+            high = candidate
+            for _ in range(24):
+                mid = low + (high - low) / 2
+                mid_value = _angle_diff(angle_fn(mid), target)
+                if abs(mid_value) < 1e-4:
+                    return mid
+                if (mid_value > 0 > _angle_diff(angle_fn(low), target)) or (
+                    mid_value < 0 < _angle_diff(angle_fn(low), target)
+                ):
+                    high = mid
+                else:
+                    low = mid
+            return low + (high - low) / 2
+        last_value = current
+        candidate += step
+    return best_time
 
 
 def _format_birth_time(value: time | str) -> str:
@@ -149,7 +214,9 @@ def _mock_response(payload: NatalChartRequest) -> NatalChartResponse:
             applying=True,
         )
     ]
-    summary = ["Sol em Áries", "Ascendente em Áries", "Lua em Touro"]
+    summary = _build_summary(
+        planets, sample_points.asc, sample_points.mc, payload.language
+    )
     return NatalChartResponse(
         metadata=metadata,
         points=sample_points,
@@ -168,12 +235,7 @@ def calculate_natal_chart(payload: NatalChartRequest) -> NatalChartResponse:
     timezone_name = resolve_timezone(lat, lon)
     local_dt = datetime.combine(payload.birth_date, payload.birth_time)
     utc_dt = local_to_utc(local_dt, timezone_name)
-    jd_ut = swe.julday(
-        utc_dt.year,
-        utc_dt.month,
-        utc_dt.day,
-        utc_dt.hour + utc_dt.minute / 60 + utc_dt.second / 3600,
-    )
+    jd_ut = _julian_day(utc_dt)
 
     ephemeris_flags = _setup_ephemeris(payload.zodiac, payload.sidereal_mode)
 
@@ -271,6 +333,157 @@ def calculate_natal_chart(payload: NatalChartRequest) -> NatalChartResponse:
     )
 
 
+def calculate_solar_return(payload: SolarReturnRequest) -> NatalChartResponse:
+    natal_chart = calculate_natal_chart(payload)
+    natal_sun = next(
+        (planet for planet in natal_chart.planets if planet.name == "Sun"), None
+    )
+    if natal_sun is None:
+        raise RuntimeError("Não foi possível determinar o Sol natal.")
+    lat, lon, normalized_place = geocode_place(payload.birth_place)
+    timezone_name = resolve_timezone(lat, lon)
+    base_local = datetime(
+        payload.target_year,
+        payload.birth_date.month,
+        payload.birth_date.day,
+        payload.birth_time.hour,
+        payload.birth_time.minute,
+        payload.birth_time.second,
+    )
+    start_local = base_local - timedelta(days=3)
+    end_local = base_local + timedelta(days=3)
+    start_utc = local_to_utc(start_local, timezone_name)
+    end_utc = local_to_utc(end_local, timezone_name)
+    event_utc = _find_event_time(start_utc, end_utc, _sun_longitude, natal_sun.longitude)
+    return calculate_natal_chart(
+        NatalChartRequest(
+            full_name=payload.full_name,
+            birth_date=event_utc.date(),
+            birth_time=event_utc.time(),
+            birth_place=normalized_place,
+            language=payload.language,
+            house_system=payload.house_system,
+            zodiac=payload.zodiac,
+            sidereal_mode=payload.sidereal_mode,
+            aspects=payload.aspects,
+        )
+    )
+
+
+def calculate_progression(payload: ProgressionRequest) -> NatalChartResponse:
+    delta_days = (payload.target_date - payload.birth_date).days
+    progressed_date = payload.birth_date + timedelta(days=delta_days / 365.2422)
+    return calculate_natal_chart(
+        NatalChartRequest(
+            full_name=payload.full_name,
+            birth_date=progressed_date,
+            birth_time=payload.birth_time,
+            birth_place=payload.birth_place,
+            language=payload.language,
+            house_system=payload.house_system,
+            zodiac=payload.zodiac,
+            sidereal_mode=payload.sidereal_mode,
+            aspects=payload.aspects,
+        )
+    )
+
+
+def calculate_lunation(payload: LunationRequest) -> LunationResponse:
+    reference = datetime.combine(payload.reference_date, time(0, 0))
+    start = reference
+    end = reference + timedelta(days=30)
+    target = 0.0 if payload.phase == "new" else 180.0
+
+    def moon_phase(value: datetime) -> float:
+        return (_moon_longitude(value) - _sun_longitude(value)) % 360
+
+    event_utc = _find_event_time(start, end, moon_phase, target)
+    moon_lon = _moon_longitude(event_utc)
+    sun_lon = _sun_longitude(event_utc)
+    summary = (
+        "Lua Nova"
+        if payload.phase == "new" and payload.language == "pt-BR"
+        else "Lua Cheia"
+        if payload.phase == "full" and payload.language == "pt-BR"
+        else "New Moon"
+        if payload.phase == "new"
+        else "Full Moon"
+    )
+    return LunationResponse(
+        phase=payload.phase,
+        utc_datetime=_format_utc_datetime(event_utc),
+        longitude_sun=round(sun_lon, 6),
+        longitude_moon=round(moon_lon, 6),
+        summary=summary,
+    )
+
+
+def build_ai_interpretation(payload: AIInterpretationRequest) -> AIInterpretationResponse:
+    chart = calculate_natal_chart(payload)
+    sun = next((p for p in chart.planets if p.name == "Sun"), None)
+    moon = next((p for p in chart.planets if p.name == "Moon"), None)
+    asc = chart.points.asc
+    highlights = []
+    interpretation = []
+    if sun:
+        label, element, modality = describe_sign(sun.sign, payload.language)
+        highlights.append(
+            f"{'Sol' if payload.language == 'pt-BR' else 'Sun'} em {label}"
+        )
+        interpretation.append(
+            f"{'Identidade' if payload.language == 'pt-BR' else 'Identity'}: "
+            f"{label} ({element}, {modality})."
+        )
+    if moon:
+        label, element, modality = describe_sign(moon.sign, payload.language)
+        highlights.append(
+            f"{'Lua' if payload.language == 'pt-BR' else 'Moon'} em {label}"
+        )
+        interpretation.append(
+            f"{'Emoções' if payload.language == 'pt-BR' else 'Emotions'}: "
+            f"{label} ({element}, {modality})."
+        )
+    asc_label, asc_element, asc_modality = describe_sign(asc.sign, payload.language)
+    highlights.append(
+        f"{'Ascendente' if payload.language == 'pt-BR' else 'Ascendant'} em {asc_label}"
+    )
+    interpretation.append(
+        f"{'Aparência' if payload.language == 'pt-BR' else 'Appearance'}: "
+        f"{asc_label} ({asc_element}, {asc_modality})."
+    )
+    focus_hint = {
+        "general": "Foco geral" if payload.language == "pt-BR" else "General focus",
+        "relationships": "Relacionamentos"
+        if payload.language == "pt-BR"
+        else "Relationships",
+        "career": "Carreira" if payload.language == "pt-BR" else "Career",
+    }[payload.focus]
+    interpretation.append(focus_hint)
+    return AIInterpretationResponse(
+        metadata=chart.metadata,
+        focus=payload.focus,
+        highlights=highlights,
+        interpretation=interpretation,
+    )
+
+
+def build_rtf_report(payload: NatalChartRequest) -> str:
+    chart = calculate_natal_chart(payload)
+    lines = [
+        r"{\rtf1\ansi\deff0",
+        r"{\b AstroLumen Report}\par",
+        f"Nome: {chart.metadata.full_name}\\par",
+        f"Local: {chart.metadata.birth_place}\\par",
+        f"Data: {chart.metadata.birth_date} {chart.metadata.birth_time}\\par",
+        r"\par",
+        r"{\b Resumo}\par",
+    ]
+    for item in chart.summary:
+        lines.append(f"- {item}\\par")
+    lines.append("}")
+    return "".join(lines)
+
+
 def _resolve_house(longitude: float, cusps: list[float]) -> int:
     normalized = longitude % 360
     for idx in range(12):
@@ -291,19 +504,41 @@ def _build_summary(
 ) -> list[str]:
     sun = next((p for p in planets if p.name == "Sun"), None)
     moon = next((p for p in planets if p.name == "Moon"), None)
+    venus = next((p for p in planets if p.name == "Venus"), None)
+    mars = next((p for p in planets if p.name == "Mars"), None)
     summary = []
     if language == "pt-BR":
         if sun:
-            summary.append(f"Sol em {sun.sign}")
+            sun_label, sun_element, sun_modality = describe_sign(sun.sign, language)
+            summary.append(f"Sol em {sun_label} ({sun_element}, {sun_modality})")
         if moon:
-            summary.append(f"Lua em {moon.sign}")
-        summary.append(f"Ascendente em {asc.sign}")
-        summary.append(f"MC em {mc.sign}")
+            moon_label, moon_element, moon_modality = describe_sign(moon.sign, language)
+            summary.append(f"Lua em {moon_label} ({moon_element}, {moon_modality})")
+        asc_label, asc_element, asc_modality = describe_sign(asc.sign, language)
+        summary.append(f"Ascendente em {asc_label} ({asc_element}, {asc_modality})")
+        if venus:
+            venus_label, _, _ = describe_sign(venus.sign, language)
+            summary.append(f"Vênus em {venus_label}")
+        if mars:
+            mars_label, _, _ = describe_sign(mars.sign, language)
+            summary.append(f"Marte em {mars_label}")
+        mc_label, _, _ = describe_sign(mc.sign, language)
+        summary.append(f"MC em {mc_label}")
     else:
         if sun:
-            summary.append(f"Sun in {sun.sign}")
+            sun_label, sun_element, sun_modality = describe_sign(sun.sign, language)
+            summary.append(f"Sun in {sun_label} ({sun_element}, {sun_modality})")
         if moon:
-            summary.append(f"Moon in {moon.sign}")
-        summary.append(f"Ascendant in {asc.sign}")
-        summary.append(f"MC in {mc.sign}")
+            moon_label, moon_element, moon_modality = describe_sign(moon.sign, language)
+            summary.append(f"Moon in {moon_label} ({moon_element}, {moon_modality})")
+        asc_label, asc_element, asc_modality = describe_sign(asc.sign, language)
+        summary.append(f"Ascendant in {asc_label} ({asc_element}, {asc_modality})")
+        if venus:
+            venus_label, _, _ = describe_sign(venus.sign, language)
+            summary.append(f"Venus in {venus_label}")
+        if mars:
+            mars_label, _, _ = describe_sign(mars.sign, language)
+            summary.append(f"Mars in {mars_label}")
+        mc_label, _, _ = describe_sign(mc.sign, language)
+        summary.append(f"MC in {mc_label}")
     return summary

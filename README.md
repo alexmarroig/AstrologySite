@@ -64,6 +64,74 @@ curl -X POST http://localhost:8000/v1/chart/natal \
   }'
 ```
 
+### POST /v1/chart/solar-return
+
+```bash
+curl -X POST http://localhost:8000/v1/chart/solar-return \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name": "Ada Lovelace",
+    "birth_date": "1815-12-10",
+    "birth_time": "10:00",
+    "birth_place": "London, UK",
+    "target_year": 2025
+  }'
+```
+
+### POST /v1/chart/progression
+
+```bash
+curl -X POST http://localhost:8000/v1/chart/progression \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name": "Ada Lovelace",
+    "birth_date": "1815-12-10",
+    "birth_time": "10:00",
+    "birth_place": "London, UK",
+    "target_date": "2025-05-10"
+  }'
+```
+
+### POST /v1/lunation
+
+```bash
+curl -X POST http://localhost:8000/v1/lunation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reference_date": "2025-05-10",
+    "phase": "new",
+    "language": "pt-BR"
+  }'
+```
+
+### POST /v1/report/doc
+
+```bash
+curl -X POST http://localhost:8000/v1/report/doc \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name": "Ada Lovelace",
+    "birth_date": "1815-12-10",
+    "birth_time": "10:00",
+    "birth_place": "London, UK"
+  }' --output astrolumen-report.doc
+```
+
+### POST /v1/interpretation/ai
+
+```bash
+curl -X POST http://localhost:8000/v1/interpretation/ai \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name": "Ada Lovelace",
+    "birth_date": "1815-12-10",
+    "birth_time": "10:00",
+    "birth_place": "London, UK",
+    "focus": "general",
+    "language": "pt-BR"
+  }'
+```
+
 ### Resposta esperada (exemplo)
 
 ```json
