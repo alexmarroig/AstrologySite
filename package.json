@@ -1,0 +1,29 @@
+{
+  "name": "astrolumen-backend",
+  "version": "1.0.0",
+  "description": "Backend Astrolumen com 881 interpretações",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/scripts/seed-interpretations.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "aws-sdk": "^2.1580.0",
+    "bcrypt": "^5.1.1",
+    "bull": "^4.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.13",
+    "openai": "^4.58.0",
+    "pg": "^8.12.0",
+    "stripe": "^15.12.0",
+    "swisseph": "^2.10.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
