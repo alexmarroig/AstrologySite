@@ -26,6 +26,7 @@ from app.api.models import (
 from app.astro.aspects import calculate_aspects
 from app.astro.geocode import geocode_place
 from app.astro.houses import calculate_houses
+from app.astro.interpretations import get_interpretation
 from app.astro.timezone import local_to_utc, resolve_timezone
 from app.core.config import settings
 from app.utils.signs import describe_sign, to_sign_position
@@ -425,32 +426,97 @@ def build_ai_interpretation(payload: AIInterpretationRequest) -> AIInterpretatio
     asc = chart.points.asc
     highlights = []
     interpretation = []
+
+    def append_with_fallback(
+        stored_text: str | None,
+        fallback_text: str | None,
+    ) -> None:
+        if stored_text:
+            interpretation.append(stored_text)
+            return
+        if settings.ai_fallback_enabled and fallback_text:
+            interpretation.append(fallback_text)
+
     if sun:
         label, element, modality = describe_sign(sun.sign, payload.language)
         highlights.append(
             f"{'Sol' if payload.language == 'pt-BR' else 'Sun'} em {label}"
         )
-        interpretation.append(
+        append_with_fallback(
+            get_interpretation(
+                "planet_sign",
+                planet="Sun",
+                sign=sun.sign,
+                language=payload.language,
+            ),
             f"{'Identidade' if payload.language == 'pt-BR' else 'Identity'}: "
-            f"{label} ({element}, {modality})."
+            f"{label} ({element}, {modality}).",
+        )
+        append_with_fallback(
+            get_interpretation(
+                "planet_house",
+                planet="Sun",
+                house=sun.house,
+                language=payload.language,
+            ),
+            f"{'Propósito' if payload.language == 'pt-BR' else 'Purpose'}: "
+            f"{'Casa' if payload.language == 'pt-BR' else 'House'} {sun.house}.",
         )
     if moon:
         label, element, modality = describe_sign(moon.sign, payload.language)
         highlights.append(
             f"{'Lua' if payload.language == 'pt-BR' else 'Moon'} em {label}"
         )
-        interpretation.append(
+        append_with_fallback(
+            get_interpretation(
+                "planet_sign",
+                planet="Moon",
+                sign=moon.sign,
+                language=payload.language,
+            ),
             f"{'Emoções' if payload.language == 'pt-BR' else 'Emotions'}: "
-            f"{label} ({element}, {modality})."
+            f"{label} ({element}, {modality}).",
+        )
+        append_with_fallback(
+            get_interpretation(
+                "planet_house",
+                planet="Moon",
+                house=moon.house,
+                language=payload.language,
+            ),
+            f"{'Necessidades' if payload.language == 'pt-BR' else 'Needs'}: "
+            f"{'Casa' if payload.language == 'pt-BR' else 'House'} {moon.house}.",
         )
     asc_label, asc_element, asc_modality = describe_sign(asc.sign, payload.language)
     highlights.append(
         f"{'Ascendente' if payload.language == 'pt-BR' else 'Ascendant'} em {asc_label}"
     )
-    interpretation.append(
+    append_with_fallback(
+        get_interpretation(
+            "point_sign",
+            planet="Ascendant",
+            sign=asc.sign,
+            language=payload.language,
+        ),
         f"{'Aparência' if payload.language == 'pt-BR' else 'Appearance'}: "
-        f"{asc_label} ({asc_element}, {asc_modality})."
+        f"{asc_label} ({asc_element}, {asc_modality}).",
     )
+
+    for aspect in chart.aspects:
+        stored_text = get_interpretation(
+            "aspect",
+            planet=aspect.planet1,
+            other_planet=aspect.planet2,
+            aspect=aspect.type,
+            language=payload.language,
+        ) or get_interpretation(
+            "aspect",
+            planet=aspect.planet2,
+            other_planet=aspect.planet1,
+            aspect=aspect.type,
+            language=payload.language,
+        )
+        append_with_fallback(stored_text, None)
     focus_hint = {
         "general": "Foco geral" if payload.language == "pt-BR" else "General focus",
         "relationships": "Relacionamentos"

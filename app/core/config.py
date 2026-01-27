@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     geocode_user_agent: str = "astrolumen-api"
     cors_origins: list[str] = ["http://localhost:5173"]
+    interpretations_db_path: str = "interpretations.db"
+    ai_fallback_enabled: bool = True
 
     @field_validator("cors_origins", mode="before")
     @classmethod

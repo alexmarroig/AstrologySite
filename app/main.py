@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import router as api_router
+from app.astro.interpretations import init_interpretations_store
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.utils.rate_limit import rate_limit
@@ -62,6 +63,7 @@ app.include_router(
 @app.on_event("startup")
 async def on_startup() -> None:
     logger.info("AstroLumen API starting", extra={"mock_mode": settings.mock_mode})
+    init_interpretations_store()
 
 
 @app.on_event("shutdown")
