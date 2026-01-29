@@ -132,6 +132,31 @@ const buildAspects = (planetPositions) => {
   return aspects.sort((a, b) => a.orb - b.orb);
 };
 
+const buildInterChartAspects = (planets1, planets2) => {
+  const aspects = [];
+  const planetEntries1 = Object.entries(planets1);
+  const planetEntries2 = Object.entries(planets2);
+
+  for (const [planet1, data1] of planetEntries1) {
+    for (const [planet2, data2] of planetEntries2) {
+      const diff = normalizeAngle(data1.longitude - data2.longitude);
+      for (const aspect of ASPECTS) {
+        const orb = Math.abs(diff - aspect.angle);
+        if (orb <= aspect.orb) {
+          aspects.push({
+            planet1,
+            planet2,
+            type: aspect.type,
+            orb: Number(orb.toFixed(2)),
+          });
+        }
+      }
+    }
+  }
+
+  return aspects.sort((a, b) => a.orb - b.orb);
+};
+
 class EphemerisService {
   async calculateNatalChart(birthDate, birthTime, birthLocation) {
     const location = parseLocation(birthLocation);
@@ -172,6 +197,42 @@ class EphemerisService {
       planets,
       houses,
       aspects,
+    };
+  }
+
+  async calculateSolarReturn(birthDate, birthTime, birthLocation, analysisYear) {
+    const [year, month, day] = birthDate.split('-').map(Number);
+    const targetYear = Number(analysisYear) || year;
+    const solarReturnDate = `${targetYear}-${String(month).padStart(2, '0')}-${String(day).padStart(
+      2,
+      '0'
+    )}`;
+    const time = birthTime || '12:00';
+    const chart = await this.calculateNatalChart(solarReturnDate, time, birthLocation);
+    return {
+      solarReturnDate: `${solarReturnDate}T${time}:00Z`,
+      chart,
+    };
+  }
+
+  async calculateSynastry(person1, person2) {
+    const chart1 = await this.calculateNatalChart(
+      person1.birthDate,
+      person1.birthTime,
+      person1.birthLocation
+    );
+    const chart2 = await this.calculateNatalChart(
+      person2.birthDate,
+      person2.birthTime,
+      person2.birthLocation
+    );
+
+    const interAspects = buildInterChartAspects(chart1.planets, chart2.planets);
+
+    return {
+      chart1,
+      chart2,
+      interAspects,
     };
   }
 }
