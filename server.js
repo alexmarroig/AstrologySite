@@ -10,6 +10,7 @@ app.use(express.json());
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/analysis', require('./src/routes/analysis.routes'));
 app.use('/api/payments', require('./src/routes/payment.routes'));
+app.use('/api/orders', require('./src/routes/orders.routes'));
 app.use('/api/newsletter', require('./src/routes/newsletter.routes'));
 
 app.get('/health', (req, res) => {
