@@ -1,25 +1,75 @@
 const express = require('express');
 
 const authMiddleware = require('../auth/auth.middleware');
+const crypto = require('crypto');
+
 const ephemerisService = require('../services/ephemeris.service');
 const interpretationService = require('../services/interpretation.service');
 const llmOptimizedService = require('../services/llm-optimized.service');
-const db = require('../db');
+const analysisCacheService = require('../services/analysis-cache.service');
+const { getPricing } = require('../services/pricing.service');
 
 const router = express.Router();
 
+const normalizeBirthPayload = (body) => ({
+  birthDate: body.birthDate || body.birth_date,
+  birthTime: body.birthTime || body.birth_time || '12:00',
+  birthLocation: body.birthLocation || body.birth_location,
+  birthLatitude: body.birthLatitude || body.birth_latitude,
+  birthLongitude: body.birthLongitude || body.birth_longitude,
+});
+
+const buildLocationPayload = (payload) => {
+  if (payload.birthLatitude && payload.birthLongitude) {
+    return {
+      latitude: Number(payload.birthLatitude),
+      longitude: Number(payload.birthLongitude),
+      label: payload.birthLocation || 'Local informado',
+    };
+  }
+  return payload.birthLocation;
+};
+
+const generateAnalysisId = () => crypto.randomUUID();
+
 router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) => {
   try {
-    const { birthDate, birthTime, birthLocation } = req.body;
+    const payload = normalizeBirthPayload(req.body);
 
-    if (!birthDate || !birthTime || !birthLocation) {
+    if (!payload.birthDate || !payload.birthLocation) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'natal_chart',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'natal_chart');
+    if (cached) {
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        ephemeris: cached.ephemeris_data,
+        houses: cached.houses_data,
+        aspects: cached.aspects_data,
+        interpretations: cached.interpretations,
+        pricing: getPricing('natal_chart'),
+        cache: { hit: true },
+      });
+    }
+
     const chartData = await ephemerisService.calculateNatalChart(
-      birthDate,
-      birthTime,
-      birthLocation
+      payload.birthDate,
+      payload.birthTime,
+      locationPayload
     );
 
     const interpretations = await interpretationService.getChartInterpretations(chartData);
@@ -30,31 +80,365 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       req.user.name
     );
 
-    const orderResult = await db.query(
-      'INSERT INTO orders (user_id, service_type, status) VALUES ($1, $2, $3) RETURNING id',
-      [req.user.id, 'natal-chart', 'completed']
-    );
-
-    await db.query(
-      'INSERT INTO analyses (order_id, user_id, analysis_type, ephemeris_data, llm_analysis) VALUES ($1, $2, $3, $4, $5)',
-      [
-        orderResult.rows[0].id,
-        req.user.id,
-        'natal-chart',
-        JSON.stringify({ chartData, interpretations }),
-        analysis,
-      ]
-    );
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'natal_chart', {
+      ephemeris: chartData.planets,
+      houses: chartData.houses,
+      aspects: chartData.aspects,
+      interpretations,
+    });
 
     return res.json({
-      success: true,
-      data: { chartData, interpretations, analysis },
-      stats: {
-        totalInterpretationsUsed:
-          Object.keys(interpretations.planets).length +
-          Object.keys(interpretations.houses).length +
-          interpretations.aspects.length,
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
       },
+      ephemeris: chartData.planets,
+      houses: chartData.houses,
+      aspects: chartData.aspects,
+      interpretations,
+      summary: analysis,
+      pricing: getPricing('natal_chart'),
+      cache: { hit: false },
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const payload = normalizeBirthPayload(req.body);
+    const analysisYear = req.body.analysisYear || req.body.analysis_year;
+
+    if (!payload.birthDate || !payload.birthLocation || !analysisYear) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'solar_return',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+      analysisYear,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'solar_return');
+    if (cached) {
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        solar_return_date: cached.ephemeris_data?.solarReturnDate,
+        ephemeris: cached.ephemeris_data?.planets || cached.ephemeris_data,
+        houses: cached.houses_data,
+        aspects: cached.aspects_data,
+        interpretations: cached.interpretations,
+        pricing: getPricing('solar_return'),
+        cache: { hit: true },
+      });
+    }
+
+    const solarReturn = await ephemerisService.calculateSolarReturn(
+      payload.birthDate,
+      payload.birthTime,
+      locationPayload,
+      analysisYear
+    );
+
+    const interpretations = await interpretationService.getChartInterpretations(
+      solarReturn.chart
+    );
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'solar_return', {
+      ephemeris: {
+        solarReturnDate: solarReturn.solarReturnDate,
+        planets: solarReturn.chart.planets,
+      },
+      houses: solarReturn.chart.houses,
+      aspects: solarReturn.chart.aspects,
+      interpretations,
+    });
+
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
+      },
+      solar_return_date: solarReturn.solarReturnDate,
+      ephemeris: solarReturn.chart.planets,
+      houses: solarReturn.chart.houses,
+      aspects: solarReturn.chart.aspects,
+      interpretations,
+      pricing: getPricing('solar_return'),
+      cache: { hit: false },
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const person1 = req.body.person1 || {};
+    const person2 = req.body.person2 || {};
+
+    if (!person1.birth_date && !person1.birthDate) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+    if (!person2.birth_date && !person2.birthDate) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const normalizedPerson1 = normalizeBirthPayload(person1);
+    const normalizedPerson2 = normalizeBirthPayload(person2);
+
+    const location1 = buildLocationPayload(normalizedPerson1);
+    const location2 = buildLocationPayload(normalizedPerson2);
+
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'synastry',
+      person1: { ...normalizedPerson1, location: location1 },
+      person2: { ...normalizedPerson2, location: location2 },
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'synastry');
+    if (cached) {
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        person1: cached.ephemeris_data?.person1,
+        person2: cached.ephemeris_data?.person2,
+        aspects: cached.aspects_data,
+        compatibility_areas: cached.ephemeris_data?.compatibilityAreas,
+        interpretations: cached.interpretations,
+        pricing: getPricing('synastry'),
+        cache: { hit: true },
+      });
+    }
+
+    if (
+      normalizedPerson1.birthDate === normalizedPerson2.birthDate &&
+      normalizedPerson1.birthTime === normalizedPerson2.birthTime &&
+      JSON.stringify(location1) === JSON.stringify(location2)
+    ) {
+      return res.status(400).json({ error: 'Dados das pessoas devem ser diferentes' });
+    }
+
+    const synastry = await ephemerisService.calculateSynastry(
+      {
+        birthDate: normalizedPerson1.birthDate,
+        birthTime: normalizedPerson1.birthTime,
+        birthLocation: location1,
+      },
+      {
+        birthDate: normalizedPerson2.birthDate,
+        birthTime: normalizedPerson2.birthTime,
+        birthLocation: location2,
+      }
+    );
+
+    const keyAspects = synastry.interAspects.slice(0, 15);
+    const interpretations = [];
+
+    for (const aspect of keyAspects) {
+      const interp = await interpretationService.getAspectInterpretation(
+        aspect.planet1,
+        aspect.planet2,
+        aspect.type
+      );
+      if (interp) {
+        interpretations.push({
+          planet1: aspect.planet1,
+          planet2: aspect.planet2,
+          aspect: aspect.type,
+          orb: aspect.orb,
+          interpretation: interp.interpretation,
+        });
+      }
+    }
+
+    const harmonious = keyAspects.filter((aspect) =>
+      ['trine', 'sextile', 'conjunction'].includes(aspect.type)
+    ).length;
+    const challenging = keyAspects.filter((aspect) =>
+      ['square', 'opposition', 'quincunx'].includes(aspect.type)
+    ).length;
+    const baseScore = Math.max(4, Math.min(10, 6 + harmonious - challenging));
+
+    const compatibilityAreas = {
+      romance: {
+        score: Number((baseScore + 1).toFixed(1)),
+        description: 'Compatibilidade emocional e afetiva baseada em aspectos principais.',
+      },
+      communication: {
+        score: Number(baseScore.toFixed(1)),
+        description: 'Sinergia mental observada nas conexões entre Mercúrio e Vênus.',
+      },
+      life_goals: {
+        score: Number(Math.max(1, baseScore - 0.5).toFixed(1)),
+        description: 'Compatibilidade nos objetivos de vida e ambições compartilhadas.',
+      },
+      overall: {
+        score: Number(baseScore.toFixed(1)),
+        description: 'Equilíbrio geral entre atração, desafios e crescimento conjunto.',
+      },
+    };
+
+    const personSummary1 = {
+      name: person1.name || 'Pessoa 1',
+      sun_sign: synastry.chart1.planets.sun.sign,
+      moon_sign: synastry.chart1.planets.moon.sign,
+      ascendant: synastry.chart1.houses.house1?.sign,
+    };
+    const personSummary2 = {
+      name: person2.name || 'Pessoa 2',
+      sun_sign: synastry.chart2.planets.sun.sign,
+      moon_sign: synastry.chart2.planets.moon.sign,
+      ascendant: synastry.chart2.houses.house1?.sign,
+    };
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'synastry', {
+      ephemeris: {
+        person1: personSummary1,
+        person2: personSummary2,
+        compatibilityAreas,
+      },
+      houses: {},
+      aspects: keyAspects,
+      interpretations,
+    });
+
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      person1: personSummary1,
+      person2: personSummary2,
+      aspects: keyAspects,
+      compatibility_areas: compatibilityAreas,
+      interpretations,
+      pricing: getPricing('synastry'),
+      cache: { hit: false },
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/predictions', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const payload = normalizeBirthPayload(req.body);
+    const analysisPeriod = req.body.analysisPeriod || req.body.analysis_period || '12_months';
+
+    if (!payload.birthDate || !payload.birthLocation) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'predictions',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+      analysisPeriod,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'predictions');
+    if (cached) {
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        current_transits: cached.ephemeris_data?.currentTransits,
+        forecasts: cached.ephemeris_data?.forecasts,
+        critical_periods: cached.ephemeris_data?.criticalPeriods,
+        recommendations: cached.ephemeris_data?.recommendations,
+        pricing: getPricing('predictions'),
+        cache: { hit: true },
+      });
+    }
+
+    const today = new Date();
+    const currentChart = await ephemerisService.calculateNatalChart(
+      `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(
+        today.getUTCDate()
+      ).padStart(2, '0')}`,
+      '12:00',
+      locationPayload
+    );
+
+    const currentTransits = Object.entries(currentChart.planets).slice(0, 5).map(
+      ([planet, data]) => ({
+        planet,
+        sign: data.sign,
+        current_house: null,
+        influence: `${planet} em ${data.sign} traz foco em temas ligados ao signo.`,
+      })
+    );
+
+    const months = analysisPeriod === '3_months' ? 3 : analysisPeriod === '6_months' ? 6 : 12;
+    const forecasts = Array.from({ length: months }, (_, index) => {
+      const forecastDate = new Date(today.getFullYear(), today.getMonth() + index, 1);
+      const label = forecastDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+      return {
+        month: label,
+        theme: 'Foco em alinhamento emocional',
+        description: 'Período favorável para decisões conscientes e autocuidado.',
+        key_dates: [],
+        opportunities: ['Expandir conexões', 'Planejar metas pessoais'],
+        challenges: ['Evitar impulsos', 'Cuidar do descanso'],
+      };
+    });
+
+    const criticalPeriods = [
+      {
+        date: today.toISOString().split('T')[0],
+        event: 'Lua Nova',
+        effect: 'Renovação de intenções e projetos pessoais.',
+      },
+    ];
+
+    const recommendations = [
+      'Reserve tempo para organizar prioridades emocionais.',
+      'Aproveite o período para fortalecer parcerias de confiança.',
+    ];
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'predictions', {
+      ephemeris: {
+        currentTransits,
+        forecasts,
+        criticalPeriods,
+        recommendations,
+      },
+      houses: {},
+      aspects: [],
+      interpretations: [],
+    });
+
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
+      },
+      current_transits: currentTransits,
+      forecasts,
+      critical_periods: criticalPeriods,
+      recommendations,
+      pricing: getPricing('predictions'),
+      cache: { hit: false },
     });
   } catch (error) {
     console.error('Erro:', error);
