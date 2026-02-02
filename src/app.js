@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { initializeContentStore } = require('./services/content-store.service');
 require('dotenv').config();
 
 const app = express();
+
+initializeContentStore();
 
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
