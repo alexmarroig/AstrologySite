@@ -446,6 +446,81 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
   }
 });
 
+router.post('/progressions', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const payload = normalizeBirthPayload(req.body);
+    const analysisPeriod = req.body.analysisPeriod || req.body.analysis_period;
+
+    if (!payload.birthDate || !payload.birthLocation || !analysisPeriod) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'progressions',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+      analysisPeriod,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'progressions');
+    if (cached) {
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        analysis_period: analysisPeriod,
+        highlights: cached.ephemeris_data?.highlights,
+        recommendations: cached.ephemeris_data?.recommendations,
+        pricing: getPricing('progressions'),
+        cache: { hit: true },
+      });
+    }
+
+    const highlights = [
+      'Fase de amadurecimento emocional com foco em escolhas conscientes.',
+      'Mudanças internas pedem atenção ao autocuidado e à rotina.',
+      'Período favorável para revisar metas pessoais e profissionais.',
+    ];
+
+    const recommendations = [
+      'Observe padrões repetitivos e busque novas respostas internas.',
+      'Reserve tempo para práticas de autoconhecimento.',
+    ];
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'progressions', {
+      ephemeris: {
+        highlights,
+        recommendations,
+      },
+      houses: {},
+      aspects: [],
+      interpretations: [],
+    });
+
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
+      },
+      analysis_period: analysisPeriod,
+      highlights,
+      recommendations,
+      pricing: getPricing('progressions'),
+      cache: { hit: false },
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/stats', async (req, res) => {
   try {
     const stats = await interpretationService.getStats();

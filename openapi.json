@@ -205,6 +205,217 @@
           }
         }
       }
+    },
+    "/api/content/services": {
+      "get": {
+        "summary": "Lista serviços institucionais",
+        "responses": {
+          "200": {
+            "description": "Lista de serviços",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentService"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/services/{slug}": {
+      "get": {
+        "summary": "Detalha um serviço institucional",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviço encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentService"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Serviço não encontrado"
+          }
+        }
+      }
+    },
+    "/api/content/profile": {
+      "get": {
+        "summary": "Perfil da astróloga",
+        "responses": {
+          "200": {
+            "description": "Perfil completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/faq": {
+      "get": {
+        "summary": "FAQ institucional",
+        "responses": {
+          "200": {
+            "description": "Perguntas frequentes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentFaqItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/posts": {
+      "get": {
+        "summary": "Lista de posts",
+        "responses": {
+          "200": {
+            "description": "Posts resumidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentPostSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/posts/{id}": {
+      "get": {
+        "summary": "Detalhe de post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPost"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post não encontrado"
+          }
+        }
+      }
+    },
+    "/api/content/stats": {
+      "get": {
+        "summary": "Métricas institucionais",
+        "responses": {
+          "200": {
+            "description": "Métricas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/horoscope/daily": {
+      "get": {
+        "summary": "Horóscopo diário",
+        "parameters": [
+          {
+            "name": "sign",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horóscopo diário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HoroscopeDaily"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Signo inválido"
+          }
+        }
+      }
+    },
+    "/api/analysis/progressions": {
+      "post": {
+        "summary": "Gera análise de progressões secundárias",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prévia da análise de progressões",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -689,6 +900,303 @@
           },
           "avaliacoes": {
             "type": "integer"
+          }
+        }
+      },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProgressionsRequest": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "birth_time",
+          "birth_location",
+          "analysis_period"
+        ],
+        "properties": {
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "birth_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "birth_location": {
+            "type": "string"
+          },
+          "analysis_period": {
+            "type": "string"
+          }
+        }
+      },
+      "ProgressionsResponse": {
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string"
+          },
+          "birth_data": {
+            "type": "object"
+          },
+          "analysis_period": {
+            "type": "string"
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "cache": {
+            "type": "object"
           }
         }
       }

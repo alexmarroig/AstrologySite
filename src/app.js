@@ -15,6 +15,8 @@ app.use('/api/orders', require('./routes/orders.routes'));
 app.use('/api/newsletter', require('./routes/newsletter.routes'));
 
 app.use('/', require('./routes/content.routes'));
+app.use('/api/content', require('./routes/content-api.routes'));
+app.use('/api/horoscope', require('./routes/horoscope.routes'));
 
 app.get('/openapi.json', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'openapi.json'));

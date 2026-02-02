@@ -23,6 +23,12 @@ const PRICING = {
     currency: 'BRL',
     description: 'Previsões Astrológicas - Ciclos e Oportunidades',
   },
+  'progressions': {
+    service: 'progressions',
+    price: 227.0,
+    currency: 'BRL',
+    description: 'Progressões Secundárias - Ciclos Internos',
+  },
 };
 
 const getPricing = (serviceType) => PRICING[serviceType] || null;
