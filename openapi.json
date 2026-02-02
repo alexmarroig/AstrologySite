@@ -379,7 +379,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HoroscopeDaily"
+                  "$ref": "#/components/schemas/Horoscope"
                 }
               }
             }
@@ -1125,6 +1125,162 @@
           },
           "prazo_medio_entrega": {
             "type": "string"
+          }
+        }
+      },
+      "ContentMeta": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "InterpretationSnippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "InterpretationLibrary": {
+        "type": "object",
+        "properties": {
+          "snippets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterpretationSnippet"
+            }
+          }
+        }
+      },
+      "ReportSectionConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReportConfig": {
+        "type": "object",
+        "properties": {
+          "section_limits": {
+            "type": "object",
+            "properties": {
+              "resumo": {
+                "type": "integer"
+              },
+              "identidade": {
+                "type": "integer"
+              },
+              "relacoes": {
+                "type": "integer"
+              },
+              "carreira": {
+                "type": "integer"
+              },
+              "ciclos": {
+                "type": "integer"
+              }
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportSectionConfig"
+            }
+          }
+        }
+      },
+      "ContentFull": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ContentProfile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ContentStats"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentService"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFaqItem"
+            }
+          },
+          "interpretation_library": {
+            "$ref": "#/components/schemas/InterpretationLibrary"
+          },
+          "report_config": {
+            "$ref": "#/components/schemas/ReportConfig"
+          }
+        }
+      },
+      "Horoscope": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
