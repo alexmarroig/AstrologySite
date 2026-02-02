@@ -1,25 +1,174 @@
+const TOTAL_SNIPPET_LIMIT = 42;
+const SUMMARY_LIMIT = 2;
+const DEFAULT_SECTION_LIMIT = 6;
+
 const SECTION_LIMITS = {
-  resumo: 3,
-  identidade: 6,
-  relacoes: 6,
-  carreira: 6,
-  ciclos: 6
+  summary: SUMMARY_LIMIT,
+  core_identity: DEFAULT_SECTION_LIMIT,
+  emotional: DEFAULT_SECTION_LIMIT,
+  relational: DEFAULT_SECTION_LIMIT,
+  vocation: DEFAULT_SECTION_LIMIT,
+  cycles: DEFAULT_SECTION_LIMIT
 };
 
 const SECTION_BY_TAG = {
-  identidade: ['identidade'],
-  relacoes: ['relacionamentos', 'relacoes', 'amor'],
-  carreira: ['carreira', 'profissao'],
-  ciclos: ['ciclos', 'timing', 'transitos']
+  summary: ['summary', 'resumo', 'sintese', 'overview'],
+  core_identity: [
+    'core_identity',
+    'identidade',
+    'essencia',
+    'personalidade',
+    'autoconhecimento',
+    'transformacao'
+  ],
+  emotional: ['emotional', 'emocional', 'emocao', 'sentimentos', 'afetivo', 'lua'],
+  relational: [
+    'relational',
+    'relacionamentos',
+    'relacoes',
+    'amor',
+    'parcerias',
+    'compatibilidade',
+    'sinastria'
+  ],
+  vocation: [
+    'vocation',
+    'carreira',
+    'profissao',
+    'vocacao',
+    'trabalho',
+    'proposito',
+    'financas'
+  ],
+  cycles: [
+    'cycles',
+    'ciclos',
+    'timing',
+    'transitos',
+    'progressao',
+    'progressoes',
+    'ano',
+    'planejamento'
+  ]
+};
+
+const PLANETS = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+  'uranus',
+  'neptune',
+  'pluto'
+];
+
+const SLOW_PLANETS = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+const PERSONAL_PLANETS = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+const ANGLES = ['asc', 'ascendant', 'rising', 'mc', 'midheaven', 'ic', 'dc', 'desc', 'descendant'];
+
+const SERVICE_TYPES = {
+  natal: new Set(['natal', 'natal_chart', 'natal-chart', 'mapa-natal']),
+  solar_return: new Set(['solar_return', 'solar-return', 'revolucao-solar']),
+  synastry: new Set(['synastry', 'sinastria']),
+  predictions: new Set(['predictions', 'transitos', 'transit']),
+  progressions: new Set(['progressions', 'progressoes', 'progressao'])
 };
 
 const resolveSectionByTags = (tags = []) => {
+  const normalizedTags = normalizeList(tags);
   for (const [section, keywords] of Object.entries(SECTION_BY_TAG)) {
-    if (tags.some((tag) => keywords.includes(tag))) {
+    if (normalizedTags.some((tag) => keywords.includes(tag))) {
       return section;
     }
   }
-  return 'resumo';
+  return 'summary';
+};
+
+const normalizeList = (list = []) =>
+  list.map((item) => (typeof item === 'string' ? item.toLowerCase() : item)).filter(Boolean);
+
+const extractTokens = (snippetKey = '') => normalizeList(snippetKey.split('_'));
+
+const extractPlanets = (snippetKey = '') => {
+  const tokens = extractTokens(snippetKey);
+  return tokens.filter((token) => PLANETS.includes(token));
+};
+
+const hasAngle = (snippetKey = '') => {
+  const tokens = extractTokens(snippetKey);
+  return tokens.some((token) => ANGLES.includes(token));
+};
+
+const hasOverlay = (snippet = {}) => {
+  const tags = normalizeList(snippet.tags || []);
+  return (
+    tags.includes('overlay') ||
+    tags.includes('syn_overlay') ||
+    tags.includes('sinastria') ||
+    snippet.key?.includes('overlay') ||
+    snippet.type?.includes('overlay')
+  );
+};
+
+const resolveServiceBucket = (serviceType = '') => {
+  const normalized = serviceType.toLowerCase();
+  for (const [bucket, aliases] of Object.entries(SERVICE_TYPES)) {
+    if (aliases.has(normalized)) {
+      return bucket;
+    }
+  }
+  return normalized || 'default';
+};
+
+const matchesServiceScope = (serviceScopes = [], serviceType = '') => {
+  if (!serviceScopes || serviceScopes.length === 0) {
+    return true;
+  }
+  const normalizedServiceType = serviceType.toLowerCase();
+  const bucket = resolveServiceBucket(serviceType);
+  return normalizeList(serviceScopes).some((scope) => {
+    if (!scope) {
+      return false;
+    }
+    return scope === normalizedServiceType || resolveServiceBucket(scope) === bucket;
+  });
+};
+
+const buildPriorityScore = (snippet, serviceType) => {
+  const basePriority = snippet.priority || 0;
+  const bucket = resolveServiceBucket(serviceType);
+  const tags = normalizeList(snippet.tags || []);
+  const planets = extractPlanets(snippet.key || '');
+  const hasSun = planets.includes('sun');
+  const hasMoon = planets.includes('moon');
+  const hasPersonalPlanet = planets.some((planet) => PERSONAL_PLANETS.includes(planet));
+  const hasSlowPlanet = planets.some((planet) => SLOW_PLANETS.includes(planet));
+  const includesAngle = hasAngle(snippet.key || '');
+
+  let boost = 0;
+
+  if (bucket === 'natal' || bucket === 'solar_return') {
+    if (hasSun) boost += 30;
+    if (hasMoon) boost += 25;
+    if (includesAngle) boost += 20;
+    if (hasPersonalPlanet) boost += 10;
+  }
+
+  if (bucket === 'predictions' || bucket === 'progressions') {
+    if (hasSlowPlanet) boost += 25;
+    if (tags.some((tag) => SECTION_BY_TAG.cycles.includes(tag))) boost += 10;
+  }
+
+  if (bucket === 'synastry') {
+    if (hasOverlay(snippet)) boost += 30;
+    if (hasPersonalPlanet) boost += 20;
+    if (includesAngle) boost += 15;
+  }
+
+  return basePriority + boost;
 };
 
 const dedupeSnippets = (snippets) => {
@@ -51,25 +200,44 @@ const dedupeSnippets = (snippets) => {
 const resolveSnippets = (tokens, serviceType, contentVersion, snippets = []) => {
   const filtered = snippets.filter(
     (snippet) =>
-      tokens.includes(snippet.key) &&
-      (!snippet.service_scopes || snippet.service_scopes.includes(serviceType))
+      tokens.includes(snippet.key) && matchesServiceScope(snippet.service_scopes, serviceType)
   );
 
-  const ordered = filtered.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  const ordered = filtered
+    .map((snippet, index) => ({
+      snippet,
+      index,
+      score: buildPriorityScore(snippet, serviceType)
+    }))
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.index - b.index;
+    })
+    .map((entry) => entry.snippet);
+
   const deduped = dedupeSnippets(ordered);
 
   const sections = {
-    resumo: [],
-    identidade: [],
-    relacoes: [],
-    carreira: [],
-    ciclos: []
+    summary: [],
+    core_identity: [],
+    emotional: [],
+    relational: [],
+    vocation: [],
+    cycles: []
   };
 
+  let totalCount = 0;
+
   for (const snippet of deduped) {
+    if (totalCount >= TOTAL_SNIPPET_LIMIT) {
+      break;
+    }
     const section = resolveSectionByTags(snippet.tags || []);
     if (sections[section].length < SECTION_LIMITS[section]) {
       sections[section].push(snippet);
+      totalCount += 1;
     }
   }
 
