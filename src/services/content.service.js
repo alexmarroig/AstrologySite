@@ -20,6 +20,9 @@ const getServiceBySlug = (slug) =>
 const getProfile = () => loadContent().profile || {};
 const getFaq = () => loadContent().faq || [];
 const getStats = () => loadContent().stats || {};
+const getReportConfig = () => loadContent().report_config || {};
+const getHoroscopeDaily = () => loadContent().horoscope?.daily || {};
+
 const getPosts = () =>
   (loadContent().posts || []).map(({ id, titulo, resumo, autor, data_publicacao, imagem }) => ({
     id,
@@ -29,6 +32,7 @@ const getPosts = () =>
     data_publicacao,
     imagem
   }));
+
 const getPostById = (id) => (loadContent().posts || []).find((post) => post.id === Number(id));
 
 module.exports = {
@@ -37,6 +41,8 @@ module.exports = {
   getProfile,
   getFaq,
   getStats,
+  getReportConfig,
+  getHoroscopeDaily,
   getPosts,
   getPostById
 };
