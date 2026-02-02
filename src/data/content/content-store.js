@@ -54,11 +54,14 @@ const validateServices = (services) => {
 const validateSnippets = (snippets) => {
   assert(Array.isArray(snippets), 'interpretation_library.snippets deve ser uma lista.');
   const canonicalSet = new Set(CANONICAL_SECTIONS);
+  const seenKeys = new Set();
 
   snippets.forEach((snippet, index) => {
     assert(snippet && typeof snippet === 'object', `snippets[${index}] deve ser um objeto.`);
     assert(ALLOWED_SNIPPET_TYPES.has(snippet.type), `snippets[${index}].type inválido.`);
     assert(typeof snippet.key === 'string' && snippet.key.trim(), `snippets[${index}].key é obrigatório.`);
+    assert(!seenKeys.has(snippet.key), `snippets[${index}].key duplicado: ${snippet.key}`);
+    seenKeys.add(snippet.key);
     assert(typeof snippet.title === 'string' && snippet.title.trim(), `snippets[${index}].title é obrigatório.`);
     assert(typeof snippet.text_md === 'string' && snippet.text_md.trim(), `snippets[${index}].text_md é obrigatório.`);
     assert(typeof snippet.priority === 'number', `snippets[${index}].priority é obrigatório.`);
