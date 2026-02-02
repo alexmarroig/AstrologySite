@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { listPostSummaries, findPostById } = require('../data/content/posts');
 
 const CONTENT_PATH = path.join(__dirname, '..', '..', 'data', 'astrolumen_content_v1.json');
 let cachedContent = null;
@@ -21,19 +20,20 @@ const getServiceBySlug = (slug) =>
 const getProfile = () => loadContent().profile || {};
 const getFaq = () => loadContent().faq || [];
 const getStats = () => loadContent().stats || {};
-const { services, findServiceBySlug } = require('../data/content/services');
-const { profile } = require('../data/content/profile');
-const { faq } = require('../data/content/faq');
-const { stats } = require('../data/content/stats');
-const { listPostSummaries, findPostById } = require('../data/content/posts');
+const getReportConfig = () => loadContent().report_config || {};
+const getHoroscopeDaily = () => loadContent().horoscope?.daily || {};
 
-const getServices = () => services;
-const getServiceBySlug = (slug) => findServiceBySlug(slug);
-const getProfile = () => profile;
-const getFaq = () => faq;
-const getStats = () => stats;
-const getPosts = () => listPostSummaries();
-const getPostById = (id) => findPostById(id);
+const getPosts = () =>
+  (loadContent().posts || []).map(({ id, titulo, resumo, autor, data_publicacao, imagem }) => ({
+    id,
+    titulo,
+    resumo,
+    autor,
+    data_publicacao,
+    imagem
+  }));
+
+const getPostById = (id) => (loadContent().posts || []).find((post) => post.id === Number(id));
 
 module.exports = {
   getServices,
@@ -41,6 +41,8 @@ module.exports = {
   getProfile,
   getFaq,
   getStats,
+  getReportConfig,
+  getHoroscopeDaily,
   getPosts,
   getPostById
 };
