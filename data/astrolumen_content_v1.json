@@ -1,0 +1,275 @@
+{
+  "meta": {
+    "content_version": "v1",
+    "lang": "pt-BR",
+    "last_updated": "2026-02-02",
+    "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico."
+  },
+  "profile": {
+    "nome": "Camila Veloso",
+    "titulo": "Astróloga Profissional",
+    "foto": "/images/camila.png",
+    "formacao": "Formada em Astrologia pela Escola GAIA",
+    "inicio_estudos": 2019,
+    "experiencia": "10+ anos",
+    "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+    "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
+    "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
+    "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
+    "citacao": {
+      "autor": "Dane Rudhyar",
+      "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+    },
+    "contato": {
+      "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+      "instagram": "https://instagram.com/astrologacamila",
+      "email": "astrologacamila@gmail.com"
+    }
+  },
+  "stats": {
+    "interpretacoes": 881,
+    "mapas_gerados": 5000,
+    "avaliacao_media": 4.9,
+    "anos_experiencia": 10,
+    "prazo_medio_entrega": "3–5 dias úteis"
+  },
+  "services": [
+    {
+      "slug": "natal-chart",
+      "nome": "Mapa Astral",
+      "preco": 197,
+      "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
+      "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
+      "para_quem_e": [
+        "Quem busca autoconhecimento com base técnica",
+        "Quem vive momentos de transição",
+        "Quem deseja compreender padrões pessoais"
+      ],
+      "inclui": [
+        "10 planetas",
+        "12 casas astrológicas",
+        "Aspectos planetários",
+        "Nodos lunares",
+        "Relatório profissional em WORD",
+        "Revisão humana pela Camila"
+      ],
+      "como_funciona": [
+        "Você preenche seus dados de nascimento",
+        "O sistema gera a base técnica",
+        "Camila revisa e valida o relatório",
+        "Você recebe o relatório final por e-mail"
+      ],
+      "beneficios": [
+        "Autoconhecimento técnico",
+        "Clareza sobre padrões de vida",
+        "Base sólida para decisões"
+      ],
+      "faq": [
+        {
+          "q": "Mapa astral é previsão?",
+          "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+        }
+      ],
+      "cta_label": "Gerar meu mapa astral",
+      "imagem": "/images/servicos/mapa-astral.png",
+      "tags": ["autoconhecimento", "identidade", "ciclos"]
+    },
+    {
+      "slug": "solar-return",
+      "nome": "Revolução Solar",
+      "preco": 167,
+      "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Leitura do ciclo anual com base na revolução solar.",
+      "descricao": "A revolução solar indica tendências do novo ano astrológico, destacando casas ativadas, planetas dominantes e aspectos relevantes.",
+      "para_quem_e": [
+        "Quem quer planejar o próximo ano",
+        "Quem busca direcionamento por ciclos",
+        "Quem deseja clareza sobre temas anuais"
+      ],
+      "inclui": [
+        "Planetas nas casas da revolução",
+        "Aspectos dominantes do ano",
+        "Períodos críticos e favoráveis",
+        "Relatório profissional em WORD",
+        "Revisão humana pela Camila"
+      ],
+      "como_funciona": [
+        "Você envia seus dados de nascimento",
+        "Calculamos o retorno solar",
+        "Camila interpreta os temas do ano",
+        "Você recebe o relatório por e-mail"
+      ],
+      "beneficios": [
+        "Planejamento anual",
+        "Entendimento de ciclos",
+        "Decisões mais alinhadas"
+      ],
+      "faq": [
+        {
+          "q": "A revolução solar substitui o mapa natal?",
+          "a": "Não. Ela complementa o mapa natal trazendo a leitura do ciclo anual."
+        }
+      ],
+      "cta_label": "Quero meu ano astrológico",
+      "imagem": "/images/servicos/revolucao-solar.png",
+      "tags": ["ciclos", "planejamento", "ano"]
+    },
+    {
+      "slug": "synastry",
+      "nome": "Sinastria",
+      "preco": 247,
+      "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Comparação técnica de mapas para relações e parcerias.",
+      "descricao": "A sinastria compara dois mapas astrais para identificar harmonias, desafios e dinâmicas entre pessoas.",
+      "para_quem_e": [
+        "Casais que desejam aprofundar o vínculo",
+        "Relacionamentos em fase de decisão",
+        "Parcerias pessoais ou profissionais"
+      ],
+      "inclui": [
+        "Análise de Sol, Lua, Vênus e Marte",
+        "Aspectos entre mapas",
+        "Casas ativadas pela outra pessoa",
+        "Relatório profissional em WORD",
+        "Revisão humana pela Camila"
+      ],
+      "como_funciona": [
+        "Você envia os dados das duas pessoas",
+        "Geramos a comparação técnica",
+        "Camila interpreta os pontos-chave",
+        "Você recebe o relatório por e-mail"
+      ],
+      "beneficios": [
+        "Compreensão de dinâmicas",
+        "Clareza de compatibilidade",
+        "Melhor comunicação"
+      ],
+      "faq": [
+        {
+          "q": "A sinastria diz se um relacionamento vai durar?",
+          "a": "Não. Ela mostra dinâmicas e aprendizados possíveis entre duas pessoas."
+        }
+      ],
+      "cta_label": "Quero entender minha relação",
+      "imagem": "/images/servicos/sinastria.png",
+      "tags": ["relacionamentos", "parcerias", "compatibilidade"]
+    },
+    {
+      "slug": "predictions",
+      "nome": "Previsões por Trânsitos",
+      "preco": 227,
+      "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Leitura técnica de trânsitos e janelas de oportunidade.",
+      "descricao": "A análise de trânsitos aponta ciclos ativos, períodos sensíveis e oportunidades com base no mapa natal.",
+      "para_quem_e": [
+        "Quem quer se preparar para mudanças",
+        "Quem busca timing para projetos",
+        "Quem deseja entender ciclos atuais"
+      ],
+      "inclui": [
+        "Trânsitos principais do período",
+        "Alertas de períodos críticos",
+        "Orientações práticas",
+        "Relatório profissional em WORD",
+        "Revisão humana pela Camila"
+      ],
+      "como_funciona": [
+        "Você envia seus dados de nascimento",
+        "Mapeamos os trânsitos mais importantes",
+        "Camila interpreta as tendências",
+        "Você recebe o relatório por e-mail"
+      ],
+      "beneficios": [
+        "Planejamento estratégico",
+        "Clareza de ciclos",
+        "Decisões mais conscientes"
+      ],
+      "faq": [
+        {
+          "q": "As previsões determinam o futuro?",
+          "a": "Não. Elas mostram tendências e períodos para escolhas mais conscientes."
+        }
+      ],
+      "cta_label": "Quero minhas previsões",
+      "imagem": "/images/servicos/previsoes.png",
+      "tags": ["transitos", "planejamento", "ciclos"]
+    },
+    {
+      "slug": "progressions",
+      "nome": "Progressões",
+      "preco": 227,
+      "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Análise técnica de progressões e ciclos internos.",
+      "descricao": "As progressões secundárias analisam mudanças internas e fases de vida com base na evolução simbólica do mapa natal.",
+      "para_quem_e": [
+        "Quem deseja entender mudanças internas",
+        "Quem está em fase de transição",
+        "Quem busca clareza sobre ciclos pessoais"
+      ],
+      "inclui": [
+        "Progressão de Sol, Lua e planetas pessoais",
+        "Fases emocionais marcantes",
+        "Orientações práticas",
+        "Relatório profissional em WORD",
+        "Revisão humana pela Camila"
+      ],
+      "como_funciona": [
+        "Você informa seus dados de nascimento",
+        "Calculamos as progressões do período",
+        "Camila interpreta os temas centrais",
+        "Você recebe o relatório por e-mail"
+      ],
+      "beneficios": [
+        "Clareza sobre ciclos internos",
+        "Planejamento pessoal",
+        "Entendimento de fases"
+      ],
+      "faq": [
+        {
+          "q": "Progressões são previsões?",
+          "a": "Não. Elas mostram processos internos e ciclos de amadurecimento."
+        }
+      ],
+      "cta_label": "Quero minhas progressões",
+      "imagem": "/images/servicos/progressoes.png",
+      "tags": ["progressões", "ciclos", "maturação"]
+    }
+  ],
+  "faq": [
+    {
+      "q": "Astrologia é previsão?",
+      "a": "Não. A astrologia descreve padrões simbólicos e ciclos, não determina o futuro."
+    },
+    {
+      "q": "O mapa astral define minha vida?",
+      "a": "Não. Ele mostra potenciais e desafios, mas as escolhas continuam sendo suas."
+    },
+    {
+      "q": "Astrologia substitui terapia?",
+      "a": "Não. Pode complementar processos terapêuticos, mas não os substitui."
+    }
+  ],
+  "interpretation_library": {
+    "snippets": [
+      {
+        "type": "planet_sign_house",
+        "key": "sun_aries_house_8",
+        "title": "Sol em Áries na Casa 8",
+        "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+        "priority": 90,
+        "service_scopes": ["natal"],
+        "tags": ["identidade", "transformacao"]
+      },
+      {
+        "type": "aspect_house",
+        "key": "saturn_conjunct_neptune_house_11",
+        "title": "Saturno em conjunção com Netuno na Casa 11",
+        "text_md": "A conjunção entre Saturno e Netuno na Casa 11 aponta para responsabilidade em projetos coletivos e atenção a limites claros.",
+        "priority": 80,
+        "service_scopes": ["natal", "predictions", "progressions"],
+        "tags": ["coletivo", "projetos", "responsabilidade"]
+      }
+    ]
+  }
+}
