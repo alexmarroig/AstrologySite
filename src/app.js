@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { initializeContentStore } = require('./services/content-store.service');
+const { initializeContentStore } = require('./content/contentStore');
 require('dotenv').config();
 
 const app = express();
