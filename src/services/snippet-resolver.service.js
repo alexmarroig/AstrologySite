@@ -22,6 +22,13 @@ const resolveSectionByTags = (tags = []) => {
   return 'resumo';
 };
 
+const resolveSections = (snippet) => {
+  if (Array.isArray(snippet.sections) && snippet.sections.length > 0) {
+    return snippet.sections;
+  }
+  return [resolveSectionByTags(snippet.tags || [])];
+};
+
 const dedupeSnippets = (snippets) => {
   const hasPlanetSignHouse = new Set();
   const hasAspectHouse = new Set();
@@ -67,9 +74,14 @@ const resolveSnippets = (tokens, serviceType, contentVersion, snippets = []) => 
   };
 
   for (const snippet of deduped) {
-    const section = resolveSectionByTags(snippet.tags || []);
-    if (sections[section].length < SECTION_LIMITS[section]) {
-      sections[section].push(snippet);
+    const snippetSections = resolveSections(snippet);
+    for (const section of snippetSections) {
+      if (!sections[section]) {
+        continue;
+      }
+      if (sections[section].length < SECTION_LIMITS[section]) {
+        sections[section].push(snippet);
+      }
     }
   }
 

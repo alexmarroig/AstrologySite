@@ -259,6 +259,7 @@
         "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
         "priority": 90,
         "service_scopes": ["natal"],
+        "sections": ["identidade"],
         "tags": ["identidade", "transformacao"]
       },
       {
@@ -268,6 +269,7 @@
         "text_md": "A conjunção entre Saturno e Netuno na Casa 11 aponta para responsabilidade em projetos coletivos e atenção a limites claros.",
         "priority": 80,
         "service_scopes": ["natal", "predictions", "progressions"],
+        "sections": ["ciclos"],
         "tags": ["coletivo", "projetos", "responsabilidade"]
       }
     ]
