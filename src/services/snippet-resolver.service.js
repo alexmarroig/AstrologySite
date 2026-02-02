@@ -13,6 +13,72 @@ const SECTION_BY_TAG = {
   ciclos: ['ciclos', 'timing', 'transitos']
 };
 
+const VALID_SNIPPET_TYPES = new Set([
+  'planet_sign_house',
+  'aspect_house',
+  'planet_sign',
+  'planet_house',
+  'aspect'
+]);
+
+const VALID_SERVICE_SCOPES = new Set([
+  'natal',
+  'predictions',
+  'progressions',
+  'synastry',
+  'solar_return'
+]);
+
+const assertString = (value, label, index) => {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`Invalid snippet at index ${index}: ${label} must be a non-empty string.`);
+  }
+};
+
+const assertStringArray = (value, label, index) => {
+  if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string' || entry.trim() === '')) {
+    throw new Error(`Invalid snippet at index ${index}: ${label} must be an array of strings.`);
+  }
+};
+
+const validateSnippets = (snippets) => {
+  if (!Array.isArray(snippets)) {
+    throw new Error('Snippets must be provided as an array.');
+  }
+
+  snippets.forEach((snippet, index) => {
+    if (!snippet || typeof snippet !== 'object') {
+      throw new Error(`Invalid snippet at index ${index}: snippet must be an object.`);
+    }
+
+    assertString(snippet.key, 'key', index);
+    assertString(snippet.type, 'type', index);
+    assertString(snippet.title, 'title', index);
+    assertString(snippet.text_md, 'text_md', index);
+
+    if (!VALID_SNIPPET_TYPES.has(snippet.type)) {
+      throw new Error(`Invalid snippet at index ${index}: unsupported type "${snippet.type}".`);
+    }
+
+    if (snippet.tags !== undefined) {
+      assertStringArray(snippet.tags, 'tags', index);
+    }
+
+    if (snippet.service_scopes !== undefined) {
+      assertStringArray(snippet.service_scopes, 'service_scopes', index);
+      snippet.service_scopes.forEach((scope) => {
+        if (!VALID_SERVICE_SCOPES.has(scope)) {
+          throw new Error(`Invalid snippet at index ${index}: unsupported service scope "${scope}".`);
+        }
+      });
+    }
+
+    if (snippet.priority !== undefined && typeof snippet.priority !== 'number') {
+      throw new Error(`Invalid snippet at index ${index}: priority must be a number.`);
+    }
+  });
+};
+
 const resolveSectionByTags = (tags = []) => {
   for (const [section, keywords] of Object.entries(SECTION_BY_TAG)) {
     if (tags.some((tag) => keywords.includes(tag))) {
@@ -49,6 +115,7 @@ const dedupeSnippets = (snippets) => {
 };
 
 const resolveSnippets = (tokens, serviceType, contentVersion, snippets = []) => {
+  validateSnippets(snippets);
   const filtered = snippets.filter(
     (snippet) =>
       tokens.includes(snippet.key) &&
@@ -80,5 +147,7 @@ const resolveSnippets = (tokens, serviceType, contentVersion, snippets = []) => 
 };
 
 module.exports = {
-  resolveSnippets
+  resolveSnippets,
+  VALID_SNIPPET_TYPES,
+  VALID_SERVICE_SCOPES
 };
