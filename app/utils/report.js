@@ -13,7 +13,12 @@ const {
 const fs = require('fs');
 const path = require('path');
 
-exports.generateNatalChartReport = async (userData, chartData, analysis) => {
+exports.generateNatalChartReport = async (
+  userData,
+  chartData,
+  analysis,
+  reportPreview = null
+) => {
   try {
     const doc = new Document({
       sections: [
@@ -83,6 +88,7 @@ exports.generateNatalChartReport = async (userData, chartData, analysis) => {
               spacing: { before: 400, after: 200 },
             }),
             createAspectsTable(chartData.aspects),
+            ...(reportPreview?.sections ? buildReportPreviewSections(reportPreview) : []),
 
             // ASSINATURA
             new Paragraph({
@@ -113,6 +119,48 @@ exports.generateNatalChartReport = async (userData, chartData, analysis) => {
     throw error;
   }
 };
+
+function buildReportPreviewSections(reportPreview) {
+  const sectionEntries = Object.entries(reportPreview.sections || {});
+  if (!sectionEntries.length) {
+    return [];
+  }
+
+  const blocks = [
+    new Heading({
+      text: 'Insights do Relatório',
+      level: 2,
+      spacing: { before: 400, after: 200 },
+    }),
+  ];
+
+  for (const [sectionName, snippets] of sectionEntries) {
+    if (!snippets || !snippets.length) {
+      continue;
+    }
+    blocks.push(
+      new Heading({
+        text: sectionName.toUpperCase(),
+        level: 3,
+        spacing: { before: 300, after: 100 },
+      })
+    );
+    for (const snippet of snippets) {
+      blocks.push(
+        new Paragraph({
+          text: snippet.title,
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: snippet.text_md,
+          spacing: { after: 200 },
+        })
+      );
+    }
+  }
+
+  return blocks;
+}
 
 function createPlanetsTable(planets) {
   const rows = [

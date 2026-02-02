@@ -3,8 +3,26 @@
     "content_version": "v1",
     "lang": "pt-BR",
     "last_updated": "2026-02-02",
-    "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico."
+    "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+    "build_notes": {
+      "source": "conteudo_base_v1",
+      "pipeline": "curadoria_manual",
+      "validated_by": "Camila Veloso",
+      "validated_on": "2026-02-02"
+    },
+    "defaults": {
+      "language": "pt-BR",
+      "currency": "BRL",
+      "timezone": "America/Sao_Paulo",
+      "house_system": "P",
+      "zodiac": "tropical",
+      "date_format": "YYYY-MM-DD"
+    }
   },
+  "build_notes": [
+    "Conteúdo centralizado em um único JSON para consumo por serviços.",
+    "Atualize o campo meta.last_updated a cada revisão editorial."
+  ],
   "profile": {
     "nome": "Camila Veloso",
     "titulo": "Astróloga Profissional",
@@ -73,7 +91,11 @@
       ],
       "cta_label": "Gerar meu mapa astral",
       "imagem": "/images/servicos/mapa-astral.png",
-      "tags": ["autoconhecimento", "identidade", "ciclos"]
+      "tags": [
+        "autoconhecimento",
+        "identidade",
+        "ciclos"
+      ]
     },
     {
       "slug": "solar-return",
@@ -113,7 +135,11 @@
       ],
       "cta_label": "Quero meu ano astrológico",
       "imagem": "/images/servicos/revolucao-solar.png",
-      "tags": ["ciclos", "planejamento", "ano"]
+      "tags": [
+        "ciclos",
+        "planejamento",
+        "ano"
+      ]
     },
     {
       "slug": "synastry",
@@ -153,7 +179,11 @@
       ],
       "cta_label": "Quero entender minha relação",
       "imagem": "/images/servicos/sinastria.png",
-      "tags": ["relacionamentos", "parcerias", "compatibilidade"]
+      "tags": [
+        "relacionamentos",
+        "parcerias",
+        "compatibilidade"
+      ]
     },
     {
       "slug": "predictions",
@@ -193,7 +223,11 @@
       ],
       "cta_label": "Quero minhas previsões",
       "imagem": "/images/servicos/previsoes.png",
-      "tags": ["transitos", "planejamento", "ciclos"]
+      "tags": [
+        "transitos",
+        "planejamento",
+        "ciclos"
+      ]
     },
     {
       "slug": "progressions",
@@ -233,7 +267,40 @@
       ],
       "cta_label": "Quero minhas progressões",
       "imagem": "/images/servicos/progressoes.png",
-      "tags": ["progressões", "ciclos", "maturação"]
+      "tags": [
+        "progressões",
+        "ciclos",
+        "maturação"
+      ]
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "titulo": "Mercúrio retrógrado: mitos e verdades",
+      "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+      "conteudo_md": "# Mercúrio retrógrado\n\nMercúrio retrógrado é um convite à revisão. Em vez de medo, pense em ajustes finos, reavaliação de contratos e comunicação mais consciente.\n\n## Pontos-chave\n- Releia e renegocie antes de fechar acordos importantes.\n- Evite decisões impulsivas e revise mensagens.\n- Use o período para reorganizar rotinas e ideias.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-05-10",
+      "imagem": "/images/posts/mercurio-retrogrado.png"
+    },
+    {
+      "id": 2,
+      "titulo": "Eclipses: por que eles mexem tanto com a gente?",
+      "resumo": "Saiba como eclipses ativam ciclos e mudanças profundas.",
+      "conteudo_md": "# Eclipses e viradas de ciclo\n\nEclipses são portais de mudança. Eles aceleram processos e pedem desapego do que não faz mais sentido.\n\n## Como se preparar\n- Observe as casas ativadas no seu mapa.\n- Defina intenções claras para o próximo semestre.\n- Cuide do corpo e da mente para absorver as transformações.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-06-02",
+      "imagem": "/images/posts/eclipses.png"
+    },
+    {
+      "id": 3,
+      "titulo": "Lua em Touro: segurança emocional e prazer",
+      "resumo": "Uma leitura sobre conforto, estabilidade e autocuidado.",
+      "conteudo_md": "# Lua em Touro\n\nQuem tem Lua em Touro busca estabilidade e aprecia pequenos rituais de prazer. Essa posição fala de constância emocional e autocuidado através do corpo.\n\n## Dicas práticas\n- Crie rotinas de descanso e alimentação consciente.\n- Valorize vínculos seguros e duradouros.\n- Invista em ambientes confortáveis e acolhedores.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-07-15",
+      "imagem": "/images/posts/lua-em-touro.png"
     }
   ],
   "faq": [
@@ -250,6 +317,56 @@
       "a": "Não. Pode complementar processos terapêuticos, mas não os substitui."
     }
   ],
+  "report_config": {
+    "format": "word",
+    "default_locale": "pt-BR",
+    "delivery_window": "3–5 dias úteis",
+    "review_flow": "Revisão humana pela Camila",
+    "sections": [
+      "Introdução",
+      "Leitura técnica",
+      "Orientações práticas",
+      "Resumo final"
+    ],
+    "sections_order": [
+      "resumo",
+      "identidade",
+      "relacoes",
+      "carreira",
+      "ciclos"
+    ],
+    "dedupe_rules": [
+      {
+        "primary": "planet_sign_house",
+        "suppresses": [
+          "planet_sign",
+          "planet_house"
+        ]
+      },
+      {
+        "primary": "aspect_house",
+        "suppresses": [
+          "aspect"
+        ]
+      }
+    ]
+  },
+  "horoscope": {
+    "daily": {
+      "aries": "O dia favorece decisões conscientes e observação dos próprios impulsos.",
+      "taurus": "Busque estabilidade emocional e mantenha o foco no que nutre seu bem-estar.",
+      "gemini": "A comunicação flui melhor quando você escuta antes de responder.",
+      "cancer": "Acolha suas emoções e respeite o tempo necessário para processar sentimentos.",
+      "leo": "Seu brilho aparece quando você lidera com generosidade e escuta ativa.",
+      "virgo": "Pequenos ajustes na rotina trarão mais clareza e eficiência.",
+      "libra": "Equilíbrio nasce do diálogo honesto e da busca por cooperação.",
+      "scorpio": "Transformações internas pedem silêncio e confiança no seu processo.",
+      "sagittarius": "Abra espaço para novas ideias e direções com responsabilidade.",
+      "capricorn": "Consistência e planejamento fortalecem seus próximos passos.",
+      "aquarius": "Inove sem perder o senso de coletividade e propósito.",
+      "pisces": "Sensibilidade em alta: cuide da sua energia e dos seus limites."
+    }
+  },
   "interpretation_library": {
     "snippets": [
       {
@@ -258,8 +375,16 @@
         "title": "Sol em Áries na Casa 8",
         "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
         "priority": 90,
-        "service_scopes": ["natal"],
-        "tags": ["identidade", "transformacao"]
+        "service_scopes": [
+          "natal"
+        ],
+        "sections": [
+          "identidade"
+        ],
+        "tags": [
+          "identidade",
+          "transformacao"
+        ]
       },
       {
         "type": "aspect_house",
@@ -267,8 +392,19 @@
         "title": "Saturno em conjunção com Netuno na Casa 11",
         "text_md": "A conjunção entre Saturno e Netuno na Casa 11 aponta para responsabilidade em projetos coletivos e atenção a limites claros.",
         "priority": 80,
-        "service_scopes": ["natal", "predictions", "progressions"],
-        "tags": ["coletivo", "projetos", "responsabilidade"]
+        "service_scopes": [
+          "natal",
+          "predictions",
+          "progressions"
+        ],
+        "sections": [
+          "ciclos"
+        ],
+        "tags": [
+          "coletivo",
+          "projetos",
+          "responsabilidade"
+        ]
       }
     ]
   }
