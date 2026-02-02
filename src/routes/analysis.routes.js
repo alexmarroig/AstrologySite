@@ -8,6 +8,9 @@ const interpretationService = require('../services/interpretation.service');
 const llmOptimizedService = require('../services/llm-optimized.service');
 const analysisCacheService = require('../services/analysis-cache.service');
 const { getPricing } = require('../services/pricing.service');
+const { tokenizeChart, normalizeServiceType } = require('../services/tokenizer.service');
+const { resolveSnippets } = require('../services/snippet-resolver.service');
+const contentLibrary = require('../../data/astrolumen_content_v1.json');
 
 const router = express.Router();
 
@@ -31,6 +34,19 @@ const buildLocationPayload = (payload) => {
 };
 
 const generateAnalysisId = () => crypto.randomUUID();
+const CONTENT_VERSION = contentLibrary?.meta?.content_version || 'v1';
+const CONTENT_SNIPPETS = contentLibrary?.interpretation_library?.snippets || [];
+
+const buildReportPreview = (chartResult, serviceType) => {
+  const normalizedService = normalizeServiceType(serviceType);
+  const tokens = tokenizeChart(chartResult, normalizedService);
+  const resolved = resolveSnippets(tokens, normalizedService, CONTENT_VERSION, CONTENT_SNIPPETS);
+  return {
+    content_version: resolved.content_version,
+    tokens,
+    sections: resolved.sections,
+  };
+};
 
 router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) => {
   try {
@@ -50,6 +66,14 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'natal_chart');
     if (cached) {
+      const reportPreview = buildReportPreview(
+        {
+          planets: cached.ephemeris_data,
+          houses: cached.houses_data,
+          aspects: cached.aspects_data,
+        },
+        'natal'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -61,6 +85,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
         houses: cached.houses_data,
         aspects: cached.aspects_data,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('natal_chart'),
         cache: { hit: true },
       });
@@ -87,6 +112,8 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       interpretations,
     });
 
+    const reportPreview = buildReportPreview(chartData, 'natal');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -99,6 +126,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       aspects: chartData.aspects,
       interpretations,
       summary: analysis,
+      report_preview: reportPreview,
       pricing: getPricing('natal_chart'),
       cache: { hit: false },
     });
@@ -128,6 +156,14 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'solar_return');
     if (cached) {
+      const reportPreview = buildReportPreview(
+        {
+          planets: cached.ephemeris_data?.planets || cached.ephemeris_data,
+          houses: cached.houses_data,
+          aspects: cached.aspects_data,
+        },
+        'solar_return'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -140,6 +176,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
         houses: cached.houses_data,
         aspects: cached.aspects_data,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('solar_return'),
         cache: { hit: true },
       });
@@ -166,6 +203,8 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
       interpretations,
     });
 
+    const reportPreview = buildReportPreview(solarReturn.chart, 'solar_return');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -178,6 +217,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
       houses: solarReturn.chart.houses,
       aspects: solarReturn.chart.aspects,
       interpretations,
+      report_preview: reportPreview,
       pricing: getPricing('solar_return'),
       cache: { hit: false },
     });
@@ -213,6 +253,12 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'synastry');
     if (cached) {
+      const reportPreview = buildReportPreview(
+        {
+          aspects: cached.aspects_data,
+        },
+        'synastry'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         person1: cached.ephemeris_data?.person1,
@@ -220,6 +266,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
         aspects: cached.aspects_data,
         compatibility_areas: cached.ephemeris_data?.compatibilityAreas,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('synastry'),
         cache: { hit: true },
       });
@@ -317,6 +364,8 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
       interpretations,
     });
 
+    const reportPreview = buildReportPreview({ aspects: keyAspects }, 'synastry');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       person1: personSummary1,
@@ -324,6 +373,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
       aspects: keyAspects,
       compatibility_areas: compatibilityAreas,
       interpretations,
+      report_preview: reportPreview,
       pricing: getPricing('synastry'),
       cache: { hit: false },
     });
@@ -353,6 +403,12 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'predictions');
     if (cached) {
+      const reportPreview = buildReportPreview(
+        {
+          current_transits: cached.ephemeris_data?.currentTransits,
+        },
+        'predictions'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -364,6 +420,7 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
         forecasts: cached.ephemeris_data?.forecasts,
         critical_periods: cached.ephemeris_data?.criticalPeriods,
         recommendations: cached.ephemeris_data?.recommendations,
+        report_preview: reportPreview,
         pricing: getPricing('predictions'),
         cache: { hit: true },
       });
@@ -426,6 +483,13 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       interpretations: [],
     });
 
+    const reportPreview = buildReportPreview(
+      {
+        current_transits: currentTransits,
+      },
+      'predictions'
+    );
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -437,6 +501,7 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       forecasts,
       critical_periods: criticalPeriods,
       recommendations,
+      report_preview: reportPreview,
       pricing: getPricing('predictions'),
       cache: { hit: false },
     });
@@ -466,6 +531,7 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'progressions');
     if (cached) {
+      const reportPreview = buildReportPreview({}, 'progressions');
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -476,6 +542,7 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
         analysis_period: analysisPeriod,
         highlights: cached.ephemeris_data?.highlights,
         recommendations: cached.ephemeris_data?.recommendations,
+        report_preview: reportPreview,
         pricing: getPricing('progressions'),
         cache: { hit: true },
       });
@@ -502,6 +569,8 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
       interpretations: [],
     });
 
+    const reportPreview = buildReportPreview({}, 'progressions');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -512,6 +581,7 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
       analysis_period: analysisPeriod,
       highlights,
       recommendations,
+      report_preview: reportPreview,
       pricing: getPricing('progressions'),
       cache: { hit: false },
     });
