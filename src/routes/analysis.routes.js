@@ -41,10 +41,36 @@ const buildReportPreview = (chartResult, serviceType) => {
   const normalizedService = normalizeServiceType(serviceType);
   const tokens = tokenizeChart(chartResult, normalizedService);
   const resolved = resolveSnippets(tokens, normalizedService, CONTENT_VERSION, CONTENT_SNIPPETS);
+  const resolvedSections = resolved.sections || {};
+  const selectedKeys = [];
+  const selectedKeysSet = new Set();
+  const resolvedPreviewSections = Object.entries(resolvedSections).reduce(
+    (acc, [sectionId, snippets]) => {
+      acc[sectionId] = (snippets || [])
+        .map((snippet) => ({
+          title: snippet.title,
+          text_md: snippet.text_md,
+          key: snippet.key,
+        }))
+        .filter((snippet) => snippet.title || snippet.text_md || snippet.key);
+      for (const snippet of snippets || []) {
+        if (snippet?.key && !selectedKeysSet.has(snippet.key)) {
+          selectedKeysSet.add(snippet.key);
+          selectedKeys.push(snippet.key);
+        }
+      }
+      return acc;
+    },
+    {}
+  );
   return {
     content_version: resolved.content_version,
     tokens,
-    sections: resolved.sections,
+    sections: resolvedSections,
+    resolved_preview: {
+      sections: resolvedPreviewSections,
+    },
+    selected_keys: selectedKeys,
   };
 };
 
