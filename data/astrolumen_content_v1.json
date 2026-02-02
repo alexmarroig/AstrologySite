@@ -3,8 +3,17 @@
     "content_version": "v1",
     "lang": "pt-BR",
     "last_updated": "2026-02-02",
-    "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico."
+    "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+    "defaults": {
+      "timezone": "America/Sao_Paulo",
+      "currency": "BRL",
+      "date_format": "YYYY-MM-DD"
+    }
   },
+  "build_notes": [
+    "Conteúdo centralizado em um único JSON para consumo por serviços.",
+    "Atualize o campo meta.last_updated a cada revisão editorial."
+  ],
   "profile": {
     "nome": "Camila Veloso",
     "titulo": "Astróloga Profissional",
@@ -236,6 +245,35 @@
       "tags": ["progressões", "ciclos", "maturação"]
     }
   ],
+  "posts": [
+    {
+      "id": 1,
+      "titulo": "Mercúrio retrógrado: mitos e verdades",
+      "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+      "conteudo": "# Mercúrio retrógrado\n\nMercúrio retrógrado é um convite à revisão. Em vez de medo, pense em ajustes finos, reavaliação de contratos e comunicação mais consciente.\n\n## Pontos-chave\n- Releia e renegocie antes de fechar acordos importantes.\n- Evite decisões impulsivas e revise mensagens.\n- Use o período para reorganizar rotinas e ideias.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-05-10",
+      "imagem": "/images/posts/mercurio-retrogrado.png"
+    },
+    {
+      "id": 2,
+      "titulo": "Eclipses: por que eles mexem tanto com a gente?",
+      "resumo": "Saiba como eclipses ativam ciclos e mudanças profundas.",
+      "conteudo": "# Eclipses e viradas de ciclo\n\nEclipses são portais de mudança. Eles aceleram processos e pedem desapego do que não faz mais sentido.\n\n## Como se preparar\n- Observe as casas ativadas no seu mapa.\n- Defina intenções claras para o próximo semestre.\n- Cuide do corpo e da mente para absorver as transformações.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-06-02",
+      "imagem": "/images/posts/eclipses.png"
+    },
+    {
+      "id": 3,
+      "titulo": "Lua em Touro: segurança emocional e prazer",
+      "resumo": "Uma leitura sobre conforto, estabilidade e autocuidado.",
+      "conteudo": "# Lua em Touro\n\nQuem tem Lua em Touro busca estabilidade e aprecia pequenos rituais de prazer. Essa posição fala de constância emocional e autocuidado através do corpo.\n\n## Dicas práticas\n- Crie rotinas de descanso e alimentação consciente.\n- Valorize vínculos seguros e duradouros.\n- Invista em ambientes confortáveis e acolhedores.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-07-15",
+      "imagem": "/images/posts/lua-em-touro.png"
+    }
+  ],
   "faq": [
     {
       "q": "Astrologia é previsão?",
@@ -250,6 +288,63 @@
       "a": "Não. Pode complementar processos terapêuticos, mas não os substitui."
     }
   ],
+  "posts": [
+    {
+      "id": 1,
+      "titulo": "Mercúrio retrógrado: mitos e verdades",
+      "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+      "conteudo": "# Mercúrio retrógrado\n\nMercúrio retrógrado é um convite à revisão. Em vez de medo, pense em ajustes finos, reavaliação de contratos e comunicação mais consciente.\n\n## Pontos-chave\n- Releia e renegocie antes de fechar acordos importantes.\n- Evite decisões impulsivas e revise mensagens.\n- Use o período para reorganizar rotinas e ideias.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-05-10",
+      "imagem": "/images/posts/mercurio-retrogrado.png"
+    },
+    {
+      "id": 2,
+      "titulo": "Eclipses: por que eles mexem tanto com a gente?",
+      "resumo": "Saiba como eclipses ativam ciclos e mudanças profundas.",
+      "conteudo": "# Eclipses e viradas de ciclo\n\nEclipses são portais de mudança. Eles aceleram processos e pedem desapego do que não faz mais sentido.\n\n## Como se preparar\n- Observe as casas ativadas no seu mapa.\n- Defina intenções claras para o próximo semestre.\n- Cuide do corpo e da mente para absorver as transformações.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-06-02",
+      "imagem": "/images/posts/eclipses.png"
+    },
+    {
+      "id": 3,
+      "titulo": "Lua em Touro: segurança emocional e prazer",
+      "resumo": "Uma leitura sobre conforto, estabilidade e autocuidado.",
+      "conteudo": "# Lua em Touro\n\nQuem tem Lua em Touro busca estabilidade e aprecia pequenos rituais de prazer. Essa posição fala de constância emocional e autocuidado através do corpo.\n\n## Dicas práticas\n- Crie rotinas de descanso e alimentação consciente.\n- Valorize vínculos seguros e duradouros.\n- Invista em ambientes confortáveis e acolhedores.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2024-07-15",
+      "imagem": "/images/posts/lua-em-touro.png"
+    }
+  ],
+  "report_config": {
+    "format": "word",
+    "default_locale": "pt-BR",
+    "delivery_window": "3–5 dias úteis",
+    "review_flow": "Revisão humana pela Camila",
+    "sections": [
+      "Introdução",
+      "Leitura técnica",
+      "Orientações práticas",
+      "Resumo final"
+    ]
+  },
+  "horoscope": {
+    "daily": {
+      "aries": "O dia favorece decisões conscientes e observação dos próprios impulsos.",
+      "taurus": "Busque estabilidade emocional e mantenha o foco no que nutre seu bem-estar.",
+      "gemini": "A comunicação flui melhor quando você escuta antes de responder.",
+      "cancer": "Acolha suas emoções e respeite o tempo necessário para processar sentimentos.",
+      "leo": "Seu brilho aparece quando você lidera com generosidade e escuta ativa.",
+      "virgo": "Pequenos ajustes na rotina trarão mais clareza e eficiência.",
+      "libra": "Equilíbrio nasce do diálogo honesto e da busca por cooperação.",
+      "scorpio": "Transformações internas pedem silêncio e confiança no seu processo.",
+      "sagittarius": "Abra espaço para novas ideias e direções com responsabilidade.",
+      "capricorn": "Consistência e planejamento fortalecem seus próximos passos.",
+      "aquarius": "Inove sem perder o senso de coletividade e propósito.",
+      "pisces": "Sensibilidade em alta: cuide da sua energia e dos seus limites."
+    }
+  },
   "interpretation_library": {
     "snippets": [
       {
@@ -259,6 +354,7 @@
         "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
         "priority": 90,
         "service_scopes": ["natal"],
+        "sections": ["identidade"],
         "tags": ["identidade", "transformacao"]
       },
       {
@@ -268,6 +364,7 @@
         "text_md": "A conjunção entre Saturno e Netuno na Casa 11 aponta para responsabilidade em projetos coletivos e atenção a limites claros.",
         "priority": 80,
         "service_scopes": ["natal", "predictions", "progressions"],
+        "sections": ["ciclos"],
         "tags": ["coletivo", "projetos", "responsabilidade"]
       }
     ]
