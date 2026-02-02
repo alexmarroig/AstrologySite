@@ -96,4 +96,55 @@ describe('snippet resolver', () => {
       'id_1'
     ]);
   });
+
+  test('respects total limit across sections', () => {
+    const snippets = [];
+    const tokens = [];
+
+    for (let i = 0; i < 5; i += 1) {
+      snippets.push(
+        makeSnippet({
+          key: `id_${i}`,
+          priority: i,
+          tags: ['identidade']
+        })
+      );
+      tokens.push(`id_${i}`);
+    }
+
+    for (let i = 0; i < 5; i += 1) {
+      snippets.push(
+        makeSnippet({
+          key: `rel_${i}`,
+          priority: i,
+          tags: ['relacoes']
+        })
+      );
+      tokens.push(`rel_${i}`);
+    }
+
+    const { sections } = resolveSnippets(tokens, 'natal', 'v1', snippets, { total_limit: 4 });
+    const total = Object.values(sections).reduce((sum, list) => sum + list.length, 0);
+
+    expect(total).toBe(4);
+  });
+
+  test('returns deterministic output ordering', () => {
+    const snippets = [
+      makeSnippet({ key: 'b_key', priority: 1, tags: ['identidade'] }),
+      makeSnippet({ key: 'a_key', priority: 1, tags: ['identidade'] }),
+      makeSnippet({ key: 'c_key', priority: 2, tags: ['identidade'] })
+    ];
+
+    const tokens = snippets.map((snippet) => snippet.key);
+    const first = resolveSnippets(tokens, 'natal', 'v1', snippets).sections.identidade.map(
+      (snippet) => snippet.key
+    );
+    const second = resolveSnippets(tokens, 'natal', 'v1', [...snippets].reverse()).sections.identidade.map(
+      (snippet) => snippet.key
+    );
+
+    expect(first).toEqual(['c_key', 'a_key', 'b_key']);
+    expect(second).toEqual(first);
+  });
 });

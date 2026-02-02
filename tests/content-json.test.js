@@ -46,6 +46,12 @@ describe('astrolumen_content_v1.json', () => {
     expectString(profile.contato.email);
   });
 
+  test('profile contato whatsapp matches fixed value', () => {
+    expect(content.profile.contato.whatsapp).toBe(
+      'https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F'
+    );
+  });
+
   test('stats section includes required fields', () => {
     const stats = content.stats;
     expectNumber(stats.interpretacoes);
