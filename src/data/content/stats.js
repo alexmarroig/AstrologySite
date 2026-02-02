@@ -1,3 +1,6 @@
+const content = require('../../../data/astrolumen_content_v1.json');
+
+const stats = content.stats;
 const stats = {
   interpretacoes: 881,
   mapas_gerados: 5000,

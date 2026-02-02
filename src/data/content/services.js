@@ -1,3 +1,6 @@
+const content = require('../../../data/astrolumen_content_v1.json');
+
+const services = content.services || [];
 const services = [
   {
     slug: 'natal-chart',

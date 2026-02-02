@@ -1,3 +1,6 @@
+const content = require('../../../data/astrolumen_content_v1.json');
+
+const profile = content.profile;
 const whatsappNumber = process.env.WHATSAPP_NUMBER || '55SEUNUMEROAQUI';
 
 const profile = {
