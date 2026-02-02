@@ -1,39 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const { listPostSummaries, findPostById } = require('../data/content/posts');
+const contentStore = require('./content-store.service');
 
-const CONTENT_PATH = path.join(__dirname, '..', '..', 'data', 'astrolumen_content_v1.json');
-let cachedContent = null;
-
-const loadContent = () => {
-  if (cachedContent) {
-    return cachedContent;
-  }
-
-  const raw = fs.readFileSync(CONTENT_PATH, 'utf-8');
-  cachedContent = JSON.parse(raw);
-  return cachedContent;
-};
-
-const getServices = () => loadContent().services || [];
-const getServiceBySlug = (slug) =>
-  (loadContent().services || []).find((service) => service.slug === slug);
-const getProfile = () => loadContent().profile || {};
-const getFaq = () => loadContent().faq || [];
-const getStats = () => loadContent().stats || {};
-const { services, findServiceBySlug } = require('../data/content/services');
-const { profile } = require('../data/content/profile');
-const { faq } = require('../data/content/faq');
-const { stats } = require('../data/content/stats');
-const { listPostSummaries, findPostById } = require('../data/content/posts');
-
-const getServices = () => services;
-const getServiceBySlug = (slug) => findServiceBySlug(slug);
-const getProfile = () => profile;
-const getFaq = () => faq;
-const getStats = () => stats;
-const getPosts = () => listPostSummaries();
-const getPostById = (id) => findPostById(id);
+const getServices = () => contentStore.getServices();
+const getServiceBySlug = (slug) => contentStore.getService(slug);
+const getProfile = () => contentStore.getProfile();
+const getFaq = () => contentStore.getFAQ();
+const getStats = () => contentStore.getStats();
+const getPosts = () => contentStore.getPosts();
+const getPostById = (id) => contentStore.getPost(id);
 
 module.exports = {
   getServices,
