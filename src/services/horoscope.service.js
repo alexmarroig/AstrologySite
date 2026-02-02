@@ -2,12 +2,7 @@ const { getHoroscopeDaily } = require('./content.service');
 
 const getDailyHoroscope = (sign) => {
   const key = (sign || '').toLowerCase();
-  const texto = getHoroscopeDaily()[key];
-const contentStore = require('../data/contentStore');
-
-const getDailyHoroscope = (sign) => {
-  const key = (sign || '').toLowerCase();
-  const texto = contentStore.getHoroscope(key);
+  const texto = getHoroscopeDaily(key);
 
   if (!texto) {
     return null;
