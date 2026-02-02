@@ -369,7 +369,21 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "aries",
+                "taurus",
+                "gemini",
+                "cancer",
+                "leo",
+                "virgo",
+                "libra",
+                "scorpio",
+                "sagittarius",
+                "capricorn",
+                "aquarius",
+                "pisces"
+              ]
             }
           }
         ],
@@ -912,6 +926,10 @@
           "a": {
             "type": "string"
           }
+        },
+        "example": {
+          "q": "Mapa astral é previsão?",
+          "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
         }
       },
       "ContentService": {
@@ -977,6 +995,51 @@
               "type": "string"
             }
           }
+        },
+        "example": {
+          "slug": "natal-chart",
+          "nome": "Mapa Astral",
+          "preco": 197,
+          "prazo_entrega": "3–5 dias úteis",
+          "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
+          "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
+          "para_quem_e": [
+            "Quem busca autoconhecimento com base técnica",
+            "Quem vive momentos de transição",
+            "Quem deseja compreender padrões pessoais"
+          ],
+          "inclui": [
+            "10 planetas",
+            "12 casas astrológicas",
+            "Aspectos planetários",
+            "Nodos lunares",
+            "Relatório profissional em WORD",
+            "Revisão humana pela Camila"
+          ],
+          "como_funciona": [
+            "Você preenche seus dados de nascimento",
+            "O sistema gera a base técnica",
+            "Camila revisa e valida o relatório",
+            "Você recebe o relatório final por e-mail"
+          ],
+          "beneficios": [
+            "Autoconhecimento técnico",
+            "Clareza sobre padrões de vida",
+            "Base sólida para decisões"
+          ],
+          "faq": [
+            {
+              "q": "Mapa astral é previsão?",
+              "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+            }
+          ],
+          "cta_label": "Gerar meu mapa astral",
+          "imagem": "/images/servicos/mapa-astral.png",
+          "tags": [
+            "autoconhecimento",
+            "identidade",
+            "ciclos"
+          ]
         }
       },
       "ContentProfileQuote": {
@@ -988,6 +1051,10 @@
           "texto": {
             "type": "string"
           }
+        },
+        "example": {
+          "autor": "Dane Rudhyar",
+          "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
         }
       },
       "ContentProfileContact": {
@@ -1002,6 +1069,11 @@
           "instagram": {
             "type": "string"
           }
+        },
+        "example": {
+          "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+          "instagram": "https://instagram.com/astrologacamila",
+          "email": "astrologacamila@gmail.com"
         }
       },
       "ContentProfile": {
@@ -1055,6 +1127,36 @@
           "contato": {
             "$ref": "#/components/schemas/ContentProfileContact"
           }
+        },
+        "example": {
+          "nome": "Camila Veloso",
+          "titulo": "Astróloga Profissional",
+          "foto": "/images/camila.png",
+          "formacao": "Formada em Astrologia pela Escola GAIA",
+          "inicio_estudos": 2019,
+          "experiencia": "10+ anos",
+          "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+          "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
+          "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
+          "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
+          "citacao": {
+            "autor": "Dane Rudhyar",
+            "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+          },
+          "especialidades": [
+            "Mapa natal",
+            "Revolução solar",
+            "Progressões"
+          ],
+          "beneficios": [
+            "Leituras técnicas e aplicáveis",
+            "Clareza sobre ciclos"
+          ],
+          "contato": {
+            "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+            "instagram": "https://instagram.com/astrologacamila",
+            "email": "astrologacamila@gmail.com"
+          }
         }
       },
       "ContentFaqItem": {
@@ -1066,6 +1168,10 @@
           "a": {
             "type": "string"
           }
+        },
+        "example": {
+          "q": "Astrologia é previsão?",
+          "a": "Não. A astrologia descreve padrões simbólicos e ciclos, não determina o futuro."
         }
       },
       "ContentPostSummary": {
@@ -1090,6 +1196,14 @@
           "imagem": {
             "type": "string"
           }
+        },
+        "example": {
+          "id": 1,
+          "titulo": "Mercúrio retrógrado: mitos e verdades",
+          "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+          "autor": "Camila Veloso",
+          "data_publicacao": "2024-05-10",
+          "imagem": "/images/posts/mercurio-retrogrado.png"
         }
       },
       "ContentPost": {
@@ -1106,7 +1220,16 @@
               }
             }
           }
-        ]
+        ],
+        "example": {
+          "id": 1,
+          "titulo": "Mercúrio retrógrado: mitos e verdades",
+          "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+          "autor": "Camila Veloso",
+          "data_publicacao": "2024-05-10",
+          "imagem": "/images/posts/mercurio-retrogrado.png",
+          "conteudo": "# Mercúrio retrógrado\n\nMercúrio retrógrado é um convite à revisão. Em vez de medo, pense em ajustes finos, reavaliação de contratos e comunicação mais consciente."
+        }
       },
       "ContentStats": {
         "type": "object",
@@ -1126,8 +1249,16 @@
           "prazo_medio_entrega": {
             "type": "string"
           }
+        },
+        "example": {
+          "interpretacoes": 881,
+          "mapas_gerados": 5000,
+          "avaliacao_media": 4.9,
+          "anos_experiencia": 10,
+          "prazo_medio_entrega": "3–5 dias úteis"
         }
       },
+      "Horoscope": {
       "ContentMeta": {
         "type": "object",
         "properties": {
@@ -1296,6 +1427,375 @@
           "data": {
             "type": "string",
             "format": "date"
+          }
+        },
+        "example": {
+          "sign": "aries",
+          "texto": "O dia favorece decisões conscientes e observação dos próprios impulsos.",
+          "data": "2024-10-10"
+        }
+      },
+      "ContentMetaDefaults": {
+        "type": "object",
+        "properties": {
+          "report_config": {
+            "$ref": "#/components/schemas/ReportConfig"
+          }
+        },
+        "example": {
+          "report_config": {
+            "sections": [
+              "resumo",
+              "identidade",
+              "relacoes",
+              "carreira",
+              "ciclos"
+            ],
+            "section_limits": {
+              "resumo": 3,
+              "identidade": 6,
+              "relacoes": 6,
+              "carreira": 6,
+              "ciclos": 6
+            }
+          }
+        }
+      },
+      "ReportConfig": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "resumo",
+                "identidade",
+                "relacoes",
+                "carreira",
+                "ciclos"
+              ]
+            }
+          },
+          "section_limits": {
+            "type": "object",
+            "properties": {
+              "resumo": {
+                "type": "integer"
+              },
+              "identidade": {
+                "type": "integer"
+              },
+              "relacoes": {
+                "type": "integer"
+              },
+              "carreira": {
+                "type": "integer"
+              },
+              "ciclos": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "example": {
+          "sections": [
+            "resumo",
+            "identidade",
+            "relacoes",
+            "carreira",
+            "ciclos"
+          ],
+          "section_limits": {
+            "resumo": 3,
+            "identidade": 6,
+            "relacoes": 6,
+            "carreira": 6,
+            "ciclos": 6
+          }
+        }
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "type": "planet_sign_house",
+          "key": "sun_aries_house_8",
+          "title": "Sol em Áries na Casa 8",
+          "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+          "priority": 90,
+          "service_scopes": [
+            "natal"
+          ],
+          "tags": [
+            "identidade",
+            "transformacao"
+          ]
+        }
+      },
+      "ContentMeta": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "defaults": {
+            "$ref": "#/components/schemas/ContentMetaDefaults"
+          }
+        },
+        "example": {
+          "content_version": "v1",
+          "lang": "pt-BR",
+          "last_updated": "2026-02-02",
+          "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+          "defaults": {
+            "report_config": {
+              "sections": [
+                "resumo",
+                "identidade",
+                "relacoes",
+                "carreira",
+                "ciclos"
+              ],
+              "section_limits": {
+                "resumo": 3,
+                "identidade": 6,
+                "relacoes": 6,
+                "carreira": 6,
+                "ciclos": 6
+              }
+            }
+          }
+        }
+      },
+      "ContentInterpretationLibrary": {
+        "type": "object",
+        "properties": {
+          "snippets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Snippet"
+            }
+          }
+        },
+        "example": {
+          "snippets": [
+            {
+              "type": "planet_sign_house",
+              "key": "sun_aries_house_8",
+              "title": "Sol em Áries na Casa 8",
+              "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+              "priority": 90,
+              "service_scopes": [
+                "natal"
+              ],
+              "tags": [
+                "identidade",
+                "transformacao"
+              ]
+            }
+          ]
+        }
+      },
+      "VersionedContent": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ContentProfile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ContentStats"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentService"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFaqItem"
+            }
+          },
+          "interpretation_library": {
+            "$ref": "#/components/schemas/ContentInterpretationLibrary"
+          }
+        },
+        "example": {
+          "meta": {
+            "content_version": "v1",
+            "lang": "pt-BR",
+            "last_updated": "2026-02-02",
+            "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+            "defaults": {
+              "report_config": {
+                "sections": [
+                  "resumo",
+                  "identidade",
+                  "relacoes",
+                  "carreira",
+                  "ciclos"
+                ],
+                "section_limits": {
+                  "resumo": 3,
+                  "identidade": 6,
+                  "relacoes": 6,
+                  "carreira": 6,
+                  "ciclos": 6
+                }
+              }
+            }
+          },
+          "profile": {
+            "nome": "Camila Veloso",
+            "titulo": "Astróloga Profissional",
+            "foto": "/images/camila.png",
+            "formacao": "Formada em Astrologia pela Escola GAIA",
+            "inicio_estudos": 2019,
+            "experiencia": "10+ anos",
+            "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+            "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
+            "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
+            "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
+            "citacao": {
+              "autor": "Dane Rudhyar",
+              "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+            },
+            "especialidades": [
+              "Mapa natal",
+              "Revolução solar",
+              "Progressões"
+            ],
+            "beneficios": [
+              "Leituras técnicas e aplicáveis",
+              "Clareza sobre ciclos"
+            ],
+            "contato": {
+              "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+              "instagram": "https://instagram.com/astrologacamila",
+              "email": "astrologacamila@gmail.com"
+            }
+          },
+          "stats": {
+            "interpretacoes": 881,
+            "mapas_gerados": 5000,
+            "avaliacao_media": 4.9,
+            "anos_experiencia": 10,
+            "prazo_medio_entrega": "3–5 dias úteis"
+          },
+          "services": [
+            {
+              "slug": "natal-chart",
+              "nome": "Mapa Astral",
+              "preco": 197,
+              "prazo_entrega": "3–5 dias úteis",
+              "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
+              "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
+              "para_quem_e": [
+                "Quem busca autoconhecimento com base técnica",
+                "Quem vive momentos de transição",
+                "Quem deseja compreender padrões pessoais"
+              ],
+              "inclui": [
+                "10 planetas",
+                "12 casas astrológicas",
+                "Aspectos planetários",
+                "Nodos lunares",
+                "Relatório profissional em WORD",
+                "Revisão humana pela Camila"
+              ],
+              "como_funciona": [
+                "Você preenche seus dados de nascimento",
+                "O sistema gera a base técnica",
+                "Camila revisa e valida o relatório",
+                "Você recebe o relatório final por e-mail"
+              ],
+              "beneficios": [
+                "Autoconhecimento técnico",
+                "Clareza sobre padrões de vida",
+                "Base sólida para decisões"
+              ],
+              "faq": [
+                {
+                  "q": "Mapa astral é previsão?",
+                  "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+                }
+              ],
+              "cta_label": "Gerar meu mapa astral",
+              "imagem": "/images/servicos/mapa-astral.png",
+              "tags": [
+                "autoconhecimento",
+                "identidade",
+                "ciclos"
+              ]
+            }
+          ],
+          "faq": [
+            {
+              "q": "Astrologia é previsão?",
+              "a": "Não. A astrologia descreve padrões simbólicos e ciclos, não determina o futuro."
+            }
+          ],
+          "interpretation_library": {
+            "snippets": [
+              {
+                "type": "planet_sign_house",
+                "key": "sun_aries_house_8",
+                "title": "Sol em Áries na Casa 8",
+                "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+                "priority": 90,
+                "service_scopes": [
+                  "natal"
+                ],
+                "tags": [
+                  "identidade",
+                  "transformacao"
+                ]
+              }
+            ]
           }
         }
       },
