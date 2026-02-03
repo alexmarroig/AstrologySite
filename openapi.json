@@ -360,6 +360,39 @@
         }
       }
     },
+    "/api/horoscope/daily": {
+      "get": {
+        "summary": "Horóscopo diário",
+        "parameters": [
+          {
+            "name": "sign",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horóscopo diário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HoroscopeDaily"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Signo inválido"
+          }
+        }
+      }
+    },
+    "/api/analysis/progressions": {
+      "post": {
+        "summary": "Gera análise de progressões secundárias",
     "/api/admin/content/import": {
       "post": {
         "summary": "Importa conteúdo versionado completo",
@@ -368,12 +401,22 @@
           "content": {
             "application/json": {
               "schema": {
+                "$ref": "#/components/schemas/ProgressionsRequest"
                 "$ref": "#/components/schemas/VersionedContentFull"
               }
             }
           }
         },
         "responses": {
+          "200": {
+            "description": "Prévia da análise de progressões",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressionsResponse"
+                }
+              }
+            }
           "201": {
             "description": "Conteúdo importado",
             "content": {
@@ -395,6 +438,40 @@
     },
     "/api/admin/content/export": {
       "get": {
+        "summary": "Exporta o conteúdo versionado",
+        "responses": {
+          "200": {
+            "description": "Conteúdo JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/import": {
+      "post": {
+        "summary": "Importa conteúdo versionado",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conteúdo importado"
+          },
+          "400": {
+            "description": "Conteúdo inválido"
         "summary": "Exporta conteúdo versionado completo",
         "responses": {
           "200": {
@@ -415,6 +492,37 @@
     },
     "/api/admin/snippets": {
       "get": {
+        "summary": "Lista snippets",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "service",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "summary": "Lista snippets de interpretação",
         "responses": {
           "200": {
@@ -436,6 +544,7 @@
         }
       },
       "post": {
+        "summary": "Adiciona snippet",
         "summary": "Cria snippet de interpretação",
         "requestBody": {
           "required": true,
@@ -449,6 +558,27 @@
         },
         "responses": {
           "201": {
+            "description": "Criado"
+          },
+          "400": {
+            "description": "Snippet inválido"
+          }
+        }
+      }
+    },
+    "/api/admin/snippets/{key}": {
+      "patch": {
+        "summary": "Atualiza snippet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
             "description": "Snippet criado",
             "content": {
               "application/json": {
@@ -476,6 +606,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "$ref": "#/components/schemas/Snippet"
                 "$ref": "#/components/schemas/AdminSnippetUpdate"
               }
             }
@@ -483,6 +614,10 @@
         },
         "responses": {
           "200": {
+            "description": "Atualizado"
+          },
+          "404": {
+            "description": "Snippet não encontrado"
             "description": "Snippet atualizado",
             "content": {
               "application/json": {
@@ -509,6 +644,7 @@
     },
     "/api/admin/reports/{orderId}/generate": {
       "post": {
+        "summary": "Gera relatório DOCX para pedido",
         "summary": "Gera relatório administrativamente",
         "parameters": [
           {
@@ -516,6 +652,7 @@
             "in": "path",
             "required": true,
             "schema": {
+              "type": "integer"
               "type": "string"
             }
           }
@@ -526,6 +663,7 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/ReportGenerationResponse"
                   "$ref": "#/components/schemas/AdminReportGenerateResponse"
                 }
               }
@@ -929,6 +1067,185 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceArticleLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "descricao_completa": {
+            "$ref": "#/components/schemas/ServiceDescription"
+          },
+          "links_artigos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceArticleLink"
+            }
+          },
+          "categorias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tipo_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "Contato": {
+        "type": "object",
+        "properties": {
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          }
+        }
+      },
+      "RedesSociais": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string"
+          },
+          "youtube": {
+            "type": "string"
+          },
+          "tiktok": {
+            "type": "string"
+          }
+        }
+      },
+      "FAQItem": {
+        "type": "object",
+        "properties": {
+          "pergunta": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "biografia": {
+            "type": "string"
+          },
+          "citacao": {
+            "type": "string"
+          },
+          "contato": {
+            "$ref": "#/components/schemas/Contato"
+          },
+          "redes_sociais": {
+            "$ref": "#/components/schemas/RedesSociais"
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FAQItem"
+            }
+          }
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
             }
           }
         }
@@ -2011,8 +2328,58 @@
               }
             ]
           }
+        ]
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes_realizadas": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "satisfacao_media": {
+            "type": "number"
+          },
+          "avaliacoes": {
+            "type": "integer"
+          }
         }
       },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
       "ContentHoroscope": {
         "type": "object",
         "properties": {
@@ -2036,6 +2403,112 @@
               "type": "string"
             }
           },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
           "profile": {
             "$ref": "#/components/schemas/ContentProfile"
           },
@@ -2083,6 +2556,98 @@
               "type": "string"
             }
           },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProgressionsRequest": {
           "sections": {
             "type": "object",
             "additionalProperties": {
@@ -2159,12 +2724,43 @@
       },
       "AdminContentImportResponse": {
         "type": "object",
+        "required": [
+          "birth_date",
+          "birth_time",
+          "birth_location",
+          "analysis_period"
+        ],
         "properties": {
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "birth_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "birth_location": {
+            "type": "string"
+          },
+          "analysis_period": {
           "message": {
             "type": "string"
           }
         }
       },
+      "ProgressionsResponse": {
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string"
+          },
+          "birth_data": {
+            "type": "object"
+          },
+          "analysis_period": {
+            "type": "string"
+          },
+          "highlights": {
       "AdminSnippetUpdate": {
         "type": "object",
         "required": [
@@ -2192,11 +2788,98 @@
               "type": "string"
             }
           },
+          "recommendations": {
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
             }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "cache": {
+            "type": "object"
+          }
+        }
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "object"
+          }
+        }
+      },
+      "ResolvedPreview": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "text_md": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReportGenerationResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
           }
         }
       },

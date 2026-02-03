@@ -3,6 +3,13 @@
     "content_version": "v1",
     "lang": "pt-BR",
     "last_updated": "2026-02-02",
+    "build_notes": "Conteúdo base + biblioteca de interpretações. IA apenas refino opcional.",
+    "defaults": {
+      "tone": "profissional",
+      "max_snippets_per_section": 6,
+      "max_total_snippets": 42
+    }
+  },
     "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
     "build_notes": {
       "source": "conteudo_base_v1",
@@ -31,6 +38,8 @@
     "inicio_estudos": 2019,
     "experiencia": "10+ anos",
     "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+    "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas.",
+    "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura técnica do mapa natal e de ciclos. Entrega relatórios estruturados e revisados manualmente.",
     "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
     "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
     "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
@@ -57,6 +66,8 @@
       "nome": "Mapa Astral",
       "preco": 197,
       "prazo_entrega": "3–5 dias úteis",
+      "resumo": "Leitura técnica e completa do mapa natal.",
+      "descricao": "O mapa astral analisa a posição de planetas, signos e casas no nascimento, revelando padrões e tendências de vida com base em dados técnicos.",
       "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
       "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
       "para_quem_e": [
@@ -91,6 +102,7 @@
       ],
       "cta_label": "Gerar meu mapa astral",
       "imagem": "/images/servicos/mapa-astral.png",
+      "tags": ["autoconhecimento", "ciclos"]
       "tags": [
         "autoconhecimento",
         "identidade",
@@ -135,6 +147,7 @@
       ],
       "cta_label": "Quero meu ano astrológico",
       "imagem": "/images/servicos/revolucao-solar.png",
+      "tags": ["ciclos", "planejamento", "ano"]
       "tags": [
         "ciclos",
         "planejamento",
@@ -179,6 +192,7 @@
       ],
       "cta_label": "Quero entender minha relação",
       "imagem": "/images/servicos/sinastria.png",
+      "tags": ["relacionamentos", "parcerias", "compatibilidade"]
       "tags": [
         "relacionamentos",
         "parcerias",
@@ -223,6 +237,7 @@
       ],
       "cta_label": "Quero minhas previsões",
       "imagem": "/images/servicos/previsoes.png",
+      "tags": ["transitos", "planejamento", "ciclos"]
       "tags": [
         "transitos",
         "planejamento",
@@ -267,6 +282,7 @@
       ],
       "cta_label": "Quero minhas progressões",
       "imagem": "/images/servicos/progressoes.png",
+      "tags": ["progressões", "ciclos", "maturação"]
       "tags": [
         "progressões",
         "ciclos",
@@ -317,6 +333,102 @@
       "a": "Não. Pode complementar processos terapêuticos, mas não os substitui."
     }
   ],
+  "posts": [
+    {
+      "id": "mercurio-retro",
+      "slug": "mercurio-retrogrado",
+      "titulo": "Mercúrio retrógrado: o que observar",
+      "resumo": "Entenda como Mercúrio retrógrado pede revisão de comunicação e contratos.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2026-01-10",
+      "imagem": "/images/blog/mercurio.png",
+      "conteudo_md": "## Mercúrio retrógrado\n\nMercúrio retrógrado convida a revisar processos, contratos e diálogos. Priorize clareza e confirme informações importantes."
+    },
+    {
+      "id": "eclipses-2026",
+      "slug": "eclipses-2026",
+      "titulo": "Eclipses: como ler períodos de virada",
+      "resumo": "Os eclipses aceleram mudanças e pedem decisões conscientes.",
+      "autor": "Camila Veloso",
+      "data_publicacao": "2026-02-05",
+      "imagem": "/images/blog/eclipses.png",
+      "conteudo_md": "## Eclipses\n\nEclipses intensificam ciclos e pedem atenção aos temas ativados no mapa natal."
+    }
+  ],
+  "report_config": {
+    "sections_order": {
+      "natal": [
+        "cover",
+        "disclaimer",
+        "summary",
+        "core_identity",
+        "emotional",
+        "relationships",
+        "work_money",
+        "growth_challenges",
+        "closing"
+      ],
+      "solar_return": [
+        "cover",
+        "disclaimer",
+        "summary",
+        "year_themes",
+        "relationships",
+        "work_money",
+        "health_energy",
+        "timing_windows",
+        "closing"
+      ],
+      "synastry": [
+        "cover",
+        "disclaimer",
+        "summary",
+        "core_dynamic",
+        "strengths",
+        "challenges",
+        "communication",
+        "intimacy_values",
+        "practical_guidance",
+        "closing"
+      ],
+      "predictions": [
+        "cover",
+        "disclaimer",
+        "summary",
+        "main_transits",
+        "timing_windows",
+        "areas_of_life",
+        "watchouts",
+        "closing"
+      ],
+      "progressions": [
+        "cover",
+        "disclaimer",
+        "summary",
+        "inner_cycles",
+        "identity_shift",
+        "emotional_shift",
+        "relationships",
+        "work_money",
+        "timing_windows",
+        "closing"
+      ]
+    },
+    "dedupe_rules": [
+      {
+        "prefer_type": "planet_sign_house",
+        "suppress_types": ["planet_sign", "planet_house"]
+      },
+      {
+        "prefer_type": "aspect_house",
+        "suppress_types": ["aspect"]
+      },
+      {
+        "prefer_type": "syn_overlay",
+        "suppress_types": []
+      }
+    ]
+  },
   "report_config": {
     "format": "word",
     "default_locale": "pt-BR",
@@ -373,6 +485,15 @@
         "type": "planet_sign_house",
         "key": "sun_aries_house_8",
         "title": "Sol em Áries na Casa 8",
+        "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e forte impulso para autonomia.",
+        "priority": 90,
+        "service_scopes": ["natal"],
+        "sections": ["core_identity", "growth_challenges"],
+        "tags": ["identidade", "transformacao"],
+        "constraints": {
+          "min_orb": null,
+          "max_orb": null
+        }
         "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
         "priority": 90,
         "service_scopes": [
@@ -392,6 +513,45 @@
         "title": "Saturno em conjunção com Netuno na Casa 11",
         "text_md": "A conjunção entre Saturno e Netuno na Casa 11 aponta para responsabilidade em projetos coletivos e atenção a limites claros.",
         "priority": 80,
+        "service_scopes": ["natal", "predictions", "progressions"],
+        "sections": ["growth_challenges", "timing_windows"],
+        "tags": ["coletivo", "projetos", "responsabilidade"],
+        "constraints": {
+          "min_orb": null,
+          "max_orb": null
+        }
+      },
+      {
+        "type": "disclaimer",
+        "key": "disclaimer_general",
+        "title": "Limites da análise",
+        "text_md": "Esta análise é baseada em interpretação técnica do mapa astral e não substitui aconselhamento médico, psicológico ou financeiro.",
+        "priority": 100,
+        "service_scopes": ["natal", "solar_return", "synastry", "predictions", "progressions"],
+        "sections": ["disclaimer"],
+        "tags": ["disclaimer"],
+        "constraints": {
+          "min_orb": null,
+          "max_orb": null
+        }
+      }
+    ]
+  },
+  "horoscope": {
+    "daily": {
+      "aries": "O dia favorece decisões conscientes e observação dos próprios impulsos.",
+      "taurus": "Busque estabilidade emocional e mantenha o foco no que nutre seu bem-estar.",
+      "gemini": "A comunicação flui melhor quando você escuta antes de responder.",
+      "cancer": "Acolha suas emoções e respeite o tempo necessário para processar sentimentos.",
+      "leo": "Seu brilho aparece quando você lidera com generosidade e escuta ativa.",
+      "virgo": "Pequenos ajustes na rotina trarão mais clareza e eficiência.",
+      "libra": "Equilíbrio nasce do diálogo honesto e da busca por cooperação.",
+      "scorpio": "Transformações internas pedem silêncio e confiança no seu processo.",
+      "sagittarius": "Abra espaço para novas ideias e direções com responsabilidade.",
+      "capricorn": "Consistência e planejamento fortalecem seus próximos passos.",
+      "aquarius": "Inove sem perder o senso de coletividade e propósito.",
+      "pisces": "Sensibilidade em alta: cuide da sua energia e dos seus limites."
+    }
         "service_scopes": [
           "natal",
           "predictions",

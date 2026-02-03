@@ -1,3 +1,4 @@
+const SECTION_LIMITS = {
 const MAX_TOTAL_LIMIT = 42;
 const DEFAULT_SECTION_LIMITS = {
   resumo: 3,
@@ -8,6 +9,15 @@ const DEFAULT_SECTION_LIMITS = {
 };
 
 const SECTION_BY_TAG = {
+  identidade: ['identidade'],
+  relacoes: ['relacionamentos', 'relacoes', 'amor'],
+  carreira: ['carreira', 'profissao'],
+  ciclos: ['ciclos', 'timing', 'transitos']
+};
+
+const resolveSectionByTags = (tags = []) => {
+  for (const [section, keywords] of Object.entries(SECTION_BY_TAG)) {
+    if (tags.some((tag) => keywords.includes(tag))) {
   resumo: ['summary', 'resumo', 'sintese', 'overview'],
   identidade: ['identidade', 'essencia', 'personalidade', 'autoconhecimento', 'transformacao'],
   relacoes: ['relacionamentos', 'relacoes', 'amor', 'parcerias', 'compatibilidade', 'sinastria'],
@@ -107,6 +117,16 @@ const resolveSectionByTags = (tags = []) => {
   return 'resumo';
 };
 
+const dedupeSnippets = (snippets) => {
+  const hasPlanetSignHouse = new Set();
+  const hasAspectHouse = new Set();
+
+  for (const snippet of snippets) {
+    if (snippet.type === 'planet_sign_house') {
+      hasPlanetSignHouse.add(snippet.key);
+    }
+    if (snippet.type === 'aspect_house') {
+      hasAspectHouse.add(snippet.key);
 const resolveSections = (snippet) => {
   if (Array.isArray(snippet.sections) && snippet.sections.length > 0) {
     return normalizeList(snippet.sections);
@@ -188,6 +208,13 @@ const dedupeSnippets = (snippets, dedupeRules = DEFAULT_DEDUPE_RULES) => {
   }
 
   return snippets.filter((snippet) => {
+    if (snippet.type === 'planet_sign' || snippet.type === 'planet_house') {
+      const [planet] = snippet.key.split('_');
+      return !Array.from(hasPlanetSignHouse).some((key) => key.startsWith(`${planet}_`));
+    }
+    if (snippet.type === 'aspect') {
+      const normalized = snippet.key.replace('aspect_', '');
+      return !Array.from(hasAspectHouse).some((key) => key.includes(normalized));
     for (const rule of rules) {
       if (!rule.remove_types || !rule.remove_types.includes(snippet.type)) {
         continue;
@@ -207,6 +234,27 @@ const dedupeSnippets = (snippets, dedupeRules = DEFAULT_DEDUPE_RULES) => {
 };
 
 const resolveSnippets = (tokens, serviceType, contentVersion, snippets = []) => {
+  const filtered = snippets.filter(
+    (snippet) =>
+      tokens.includes(snippet.key) &&
+      (!snippet.service_scopes || snippet.service_scopes.includes(serviceType))
+  );
+
+  const ordered = filtered.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  const deduped = dedupeSnippets(ordered);
+
+  const sections = {
+    resumo: [],
+    identidade: [],
+    relacoes: [],
+    carreira: [],
+    ciclos: []
+  };
+
+  for (const snippet of deduped) {
+    const section = resolveSectionByTags(snippet.tags || []);
+    if (sections[section].length < SECTION_LIMITS[section]) {
+      sections[section].push(snippet);
   validateSnippets(snippets);
 const normalizeSection = (section, canonicalSections) => {
   if (canonicalSections.includes(section)) {
@@ -293,6 +341,7 @@ const resolveSnippets = (
 };
 
 module.exports = {
+  resolveSnippets
   resolveSnippets,
   VALID_SNIPPET_TYPES,
   VALID_SERVICE_SCOPES
