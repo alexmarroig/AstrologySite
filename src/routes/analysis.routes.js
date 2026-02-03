@@ -8,6 +8,15 @@ const interpretationService = require('../services/interpretation.service');
 const llmOptimizedService = require('../services/llm-optimized.service');
 const analysisCacheService = require('../services/analysis-cache.service');
 const { getPricing } = require('../services/pricing.service');
+const contentStore = require('../content/contentStore');
+const { resolveSnippets } = require('../engine/resolver');
+const {
+  tokenizeNatal,
+  tokenizeSolarReturn,
+  tokenizeSynastry,
+  tokenizePredictions,
+  tokenizeProgressions,
+} = require('../engine/tokenizer');
 
 const router = express.Router();
 
@@ -32,6 +41,26 @@ const buildLocationPayload = (payload) => {
 
 const generateAnalysisId = () => crypto.randomUUID();
 
+const buildPreview = (service, tokens) => {
+  const contentVersion = contentStore.getMeta().content_version || 'v1';
+  const resolved = resolveSnippets({ tokens, service, contentVersion });
+  const preview = {};
+  Object.entries(resolved.sections || {}).forEach(([sectionId, snippets]) => {
+    preview[sectionId] = snippets.map((snippet) => ({
+      key: snippet.key,
+      title: snippet.title,
+      text_md: snippet.text_md,
+    }));
+  });
+
+  return {
+    content_version: contentVersion,
+    tokens,
+    resolved_preview: { sections: preview },
+    selected_keys: resolved.selected_keys,
+  };
+};
+
 router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) => {
   try {
     const payload = normalizeBirthPayload(req.body);
@@ -50,6 +79,11 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'natal_chart');
     if (cached) {
+      const tokens = tokenizeNatal({
+        planets: cached.ephemeris_data,
+        aspects: cached.aspects_data,
+      });
+      const preview = buildPreview('natal', tokens);
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -63,6 +97,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
         interpretations: cached.interpretations,
         pricing: getPricing('natal_chart'),
         cache: { hit: true },
+        ...preview,
       });
     }
 
@@ -87,6 +122,8 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       interpretations,
     });
 
+    const tokens = tokenizeNatal(chartData);
+    const preview = buildPreview('natal', tokens);
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -101,6 +138,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       summary: analysis,
       pricing: getPricing('natal_chart'),
       cache: { hit: false },
+      ...preview,
     });
   } catch (error) {
     console.error('Erro:', error);
@@ -128,6 +166,11 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'solar_return');
     if (cached) {
+      const tokens = tokenizeSolarReturn({
+        planets: cached.ephemeris_data?.planets || cached.ephemeris_data,
+        aspects: cached.aspects_data,
+      });
+      const preview = buildPreview('solar_return', tokens);
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -142,6 +185,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
         interpretations: cached.interpretations,
         pricing: getPricing('solar_return'),
         cache: { hit: true },
+        ...preview,
       });
     }
 
@@ -166,6 +210,8 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
       interpretations,
     });
 
+    const tokens = tokenizeSolarReturn(solarReturn.chart);
+    const preview = buildPreview('solar_return', tokens);
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -180,6 +226,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
       interpretations,
       pricing: getPricing('solar_return'),
       cache: { hit: false },
+      ...preview,
     });
   } catch (error) {
     console.error('Erro:', error);
@@ -213,6 +260,8 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'synastry');
     if (cached) {
+      const tokens = tokenizeSynastry({ aspects: cached.aspects_data });
+      const preview = buildPreview('synastry', tokens);
       return res.json({
         analysis_id: generateAnalysisId(),
         person1: cached.ephemeris_data?.person1,
@@ -222,6 +271,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
         interpretations: cached.interpretations,
         pricing: getPricing('synastry'),
         cache: { hit: true },
+        ...preview,
       });
     }
 
@@ -317,6 +367,8 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
       interpretations,
     });
 
+    const tokens = tokenizeSynastry({ aspects: keyAspects });
+    const preview = buildPreview('synastry', tokens);
     return res.json({
       analysis_id: generateAnalysisId(),
       person1: personSummary1,
@@ -326,6 +378,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
       interpretations,
       pricing: getPricing('synastry'),
       cache: { hit: false },
+      ...preview,
     });
   } catch (error) {
     console.error('Erro:', error);
@@ -353,6 +406,14 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'predictions');
     if (cached) {
+      const transits = (cached.ephemeris_data?.currentTransits || []).map((entry) => ({
+        planet: entry.planet,
+        target: 'sun',
+        aspect: 'conjunct',
+        house: entry.current_house || null,
+      }));
+      const tokens = tokenizePredictions({ transits });
+      const preview = buildPreview('predictions', tokens);
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -366,6 +427,7 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
         recommendations: cached.ephemeris_data?.recommendations,
         pricing: getPricing('predictions'),
         cache: { hit: true },
+        ...preview,
       });
     }
 
@@ -426,6 +488,15 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       interpretations: [],
     });
 
+    const tokens = tokenizePredictions({
+      transits: currentTransits.map((entry) => ({
+        planet: entry.planet,
+        target: 'sun',
+        aspect: 'conjunct',
+        house: entry.current_house || null,
+      })),
+    });
+    const preview = buildPreview('predictions', tokens);
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -439,6 +510,88 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       recommendations,
       pricing: getPricing('predictions'),
       cache: { hit: false },
+      ...preview,
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/progressions', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const payload = normalizeBirthPayload(req.body);
+    const analysisPeriod = req.body.analysisPeriod || req.body.analysis_period;
+
+    if (!payload.birthDate || !payload.birthLocation || !analysisPeriod) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'progressions',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+      analysisPeriod,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'progressions');
+    if (cached) {
+      const tokens = tokenizeProgressions({});
+      const preview = buildPreview('progressions', tokens);
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        analysis_period: analysisPeriod,
+        highlights: cached.ephemeris_data?.highlights,
+        recommendations: cached.ephemeris_data?.recommendations,
+        pricing: getPricing('progressions'),
+        cache: { hit: true },
+        ...preview,
+      });
+    }
+
+    const highlights = [
+      'Fase de amadurecimento emocional com foco em escolhas conscientes.',
+      'Mudanças internas pedem atenção ao autocuidado e à rotina.',
+      'Período favorável para revisar metas pessoais e profissionais.',
+    ];
+
+    const recommendations = [
+      'Observe padrões repetitivos e busque novas respostas internas.',
+      'Reserve tempo para práticas de autoconhecimento.',
+    ];
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'progressions', {
+      ephemeris: {
+        highlights,
+        recommendations,
+      },
+      houses: {},
+      aspects: [],
+      interpretations: [],
+    });
+
+    const tokens = tokenizeProgressions({});
+    const preview = buildPreview('progressions', tokens);
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
+      },
+      analysis_period: analysisPeriod,
+      highlights,
+      recommendations,
+      pricing: getPricing('progressions'),
+      cache: { hit: false },
+      ...preview,
     });
   } catch (error) {
     console.error('Erro:', error);

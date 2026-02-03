@@ -17,7 +17,9 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {"type": "string"}
+                    "status": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -33,7 +35,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {"$ref": "#/components/schemas/NatalChartRequest"}
+              "schema": {
+                "$ref": "#/components/schemas/NatalChartRequest"
+              }
             }
           }
         },
@@ -42,7 +46,542 @@
             "description": "Natal chart",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/NatalChartResponse"}
+                "schema": {
+                  "$ref": "#/components/schemas/NatalChartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "summary": "Lista todos os serviços",
+        "responses": {
+          "200": {
+            "description": "Lista de serviços",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/{slug}": {
+      "get": {
+        "summary": "Detalha um serviço pelo slug",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviço encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Serviço não encontrado"
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "summary": "Perfil da astróloga",
+        "responses": {
+          "200": {
+            "description": "Perfil completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "summary": "Lista de posts do blog",
+        "responses": {
+          "200": {
+            "description": "Posts resumidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "summary": "Detalhe de um post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post não encontrado"
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Métricas do AstroLumen",
+        "responses": {
+          "200": {
+            "description": "Métricas atuais",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "summary": "Arquivo OpenAPI",
+        "responses": {
+          "200": {
+            "description": "Especificação OpenAPI em JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/services": {
+      "get": {
+        "summary": "Lista serviços institucionais",
+        "responses": {
+          "200": {
+            "description": "Lista de serviços",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentService"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/services/{slug}": {
+      "get": {
+        "summary": "Detalha um serviço institucional",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviço encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentService"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Serviço não encontrado"
+          }
+        }
+      }
+    },
+    "/api/content/profile": {
+      "get": {
+        "summary": "Perfil da astróloga",
+        "responses": {
+          "200": {
+            "description": "Perfil completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/faq": {
+      "get": {
+        "summary": "FAQ institucional",
+        "responses": {
+          "200": {
+            "description": "Perguntas frequentes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentFaqItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/posts": {
+      "get": {
+        "summary": "Lista de posts",
+        "responses": {
+          "200": {
+            "description": "Posts resumidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContentPostSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/posts/{id}": {
+      "get": {
+        "summary": "Detalhe de post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post completo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPost"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post não encontrado"
+          }
+        }
+      }
+    },
+    "/api/content/stats": {
+      "get": {
+        "summary": "Métricas institucionais",
+        "responses": {
+          "200": {
+            "description": "Métricas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/horoscope/daily": {
+      "get": {
+        "summary": "Horóscopo diário",
+        "parameters": [
+          {
+            "name": "sign",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horóscopo diário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HoroscopeDaily"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Signo inválido"
+          }
+        }
+      }
+    },
+    "/api/analysis/progressions": {
+      "post": {
+        "summary": "Gera análise de progressões secundárias",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prévia da análise de progressões",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/export": {
+      "get": {
+        "summary": "Exporta o conteúdo versionado",
+        "responses": {
+          "200": {
+            "description": "Conteúdo JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/import": {
+      "post": {
+        "summary": "Importa conteúdo versionado",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conteúdo importado"
+          },
+          "400": {
+            "description": "Conteúdo inválido"
+          }
+        }
+      }
+    },
+    "/api/admin/snippets": {
+      "get": {
+        "summary": "Lista snippets",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "service",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de snippets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Snippet"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Adiciona snippet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snippet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado"
+          },
+          "400": {
+            "description": "Snippet inválido"
+          }
+        }
+      }
+    },
+    "/api/admin/snippets/{key}": {
+      "patch": {
+        "summary": "Atualiza snippet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snippet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Atualizado"
+          },
+          "404": {
+            "description": "Snippet não encontrado"
+          }
+        }
+      }
+    },
+    "/api/admin/reports/{orderId}/generate": {
+      "post": {
+        "summary": "Gera relatório DOCX para pedido",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relatório gerado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportGenerationResponse"
+                }
               }
             }
           }
@@ -54,27 +593,84 @@
     "schemas": {
       "NatalChartRequest": {
         "type": "object",
-        "required": ["full_name", "birth_date", "birth_time", "birth_place"],
+        "required": [
+          "full_name",
+          "birth_date",
+          "birth_time",
+          "birth_place"
+        ],
         "properties": {
-          "full_name": {"type": "string"},
-          "birth_date": {"type": "string", "format": "date"},
-          "birth_time": {"type": "string", "format": "time"},
-          "birth_place": {"type": "string"},
-          "language": {"type": "string", "enum": ["pt-BR", "en"], "default": "pt-BR"},
-          "house_system": {"type": "string", "enum": ["P", "K", "W", "O", "R", "C"], "default": "P"},
-          "zodiac": {"type": "string", "enum": ["tropical", "sidereal"], "default": "tropical"},
-          "sidereal_mode": {"type": "string"},
+          "full_name": {
+            "type": "string"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "birth_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "birth_place": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "pt-BR",
+              "en"
+            ],
+            "default": "pt-BR"
+          },
+          "house_system": {
+            "type": "string",
+            "enum": [
+              "P",
+              "K",
+              "W",
+              "O",
+              "R",
+              "C"
+            ],
+            "default": "P"
+          },
+          "zodiac": {
+            "type": "string",
+            "enum": [
+              "tropical",
+              "sidereal"
+            ],
+            "default": "tropical"
+          },
+          "sidereal_mode": {
+            "type": "string"
+          },
           "aspects": {
             "type": "object",
             "properties": {
               "orbs": {
                 "type": "object",
                 "properties": {
-                  "conjunction": {"type": "number", "default": 8},
-                  "opposition": {"type": "number", "default": 8},
-                  "square": {"type": "number", "default": 6},
-                  "trine": {"type": "number", "default": 6},
-                  "sextile": {"type": "number", "default": 4}
+                  "conjunction": {
+                    "type": "number",
+                    "default": 8
+                  },
+                  "opposition": {
+                    "type": "number",
+                    "default": 8
+                  },
+                  "square": {
+                    "type": "number",
+                    "default": 6
+                  },
+                  "trine": {
+                    "type": "number",
+                    "default": 6
+                  },
+                  "sextile": {
+                    "type": "number",
+                    "default": 4
+                  }
                 }
               }
             }
@@ -84,96 +680,775 @@
       "NatalChartResponse": {
         "type": "object",
         "properties": {
-          "metadata": {"$ref": "#/components/schemas/ChartMetadata"},
-          "points": {"$ref": "#/components/schemas/ChartPoints"},
+          "metadata": {
+            "$ref": "#/components/schemas/ChartMetadata"
+          },
+          "points": {
+            "$ref": "#/components/schemas/ChartPoints"
+          },
           "houses": {
             "type": "array",
-            "items": {"$ref": "#/components/schemas/HouseCusp"}
+            "items": {
+              "$ref": "#/components/schemas/HouseCusp"
+            }
           },
           "planets": {
             "type": "array",
-            "items": {"$ref": "#/components/schemas/PlanetPosition"}
+            "items": {
+              "$ref": "#/components/schemas/PlanetPosition"
+            }
           },
           "aspects": {
             "type": "array",
-            "items": {"$ref": "#/components/schemas/AspectEntry"}
+            "items": {
+              "$ref": "#/components/schemas/AspectEntry"
+            }
           },
           "summary": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
       "ChartMetadata": {
         "type": "object",
         "properties": {
-          "full_name": {"type": "string"},
-          "birth_place": {"type": "string"},
-          "birth_date": {"type": "string"},
-          "birth_time": {"type": "string"},
-          "timezone": {"type": "string"},
-          "utc_datetime": {"type": "string"},
-          "latitude": {"type": "number"},
-          "longitude": {"type": "number"},
-          "zodiac": {"type": "string"},
-          "house_system": {"type": "string"},
-          "sidereal_mode": {"type": "string"},
+          "full_name": {
+            "type": "string"
+          },
+          "birth_place": {
+            "type": "string"
+          },
+          "birth_date": {
+            "type": "string"
+          },
+          "birth_time": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "utc_datetime": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "zodiac": {
+            "type": "string"
+          },
+          "house_system": {
+            "type": "string"
+          },
+          "sidereal_mode": {
+            "type": "string"
+          },
           "ephemeris_flags": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
       "ChartPoints": {
         "type": "object",
         "properties": {
-          "asc": {"$ref": "#/components/schemas/SignPosition"},
-          "mc": {"$ref": "#/components/schemas/SignPosition"},
-          "vertex": {"$ref": "#/components/schemas/SignPosition"},
-          "fortune": {"$ref": "#/components/schemas/SignPosition"}
+          "asc": {
+            "$ref": "#/components/schemas/SignPosition"
+          },
+          "mc": {
+            "$ref": "#/components/schemas/SignPosition"
+          },
+          "vertex": {
+            "$ref": "#/components/schemas/SignPosition"
+          },
+          "fortune": {
+            "$ref": "#/components/schemas/SignPosition"
+          }
         }
       },
       "SignPosition": {
         "type": "object",
         "properties": {
-          "sign": {"type": "string"},
-          "degree": {"type": "integer"},
-          "minute": {"type": "integer"}
+          "sign": {
+            "type": "string"
+          },
+          "degree": {
+            "type": "integer"
+          },
+          "minute": {
+            "type": "integer"
+          }
         }
       },
       "HouseCusp": {
         "type": "object",
         "properties": {
-          "index": {"type": "integer"},
-          "longitude": {"type": "number"},
-          "sign": {"type": "string"},
-          "degree": {"type": "integer"},
-          "minute": {"type": "integer"}
+          "index": {
+            "type": "integer"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "sign": {
+            "type": "string"
+          },
+          "degree": {
+            "type": "integer"
+          },
+          "minute": {
+            "type": "integer"
+          }
         }
       },
       "PlanetPosition": {
         "type": "object",
         "properties": {
-          "name": {"type": "string"},
-          "longitude": {"type": "number"},
-          "latitude": {"type": "number"},
-          "speed": {"type": "number"},
-          "sign": {"type": "string"},
-          "degree": {"type": "integer"},
-          "minute": {"type": "integer"},
-          "house": {"type": "integer"},
-          "retrograde": {"type": "boolean"}
+          "name": {
+            "type": "string"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "speed": {
+            "type": "number"
+          },
+          "sign": {
+            "type": "string"
+          },
+          "degree": {
+            "type": "integer"
+          },
+          "minute": {
+            "type": "integer"
+          },
+          "house": {
+            "type": "integer"
+          },
+          "retrograde": {
+            "type": "boolean"
+          }
         }
       },
       "AspectEntry": {
         "type": "object",
         "properties": {
-          "planet1": {"type": "string"},
-          "planet2": {"type": "string"},
-          "type": {"type": "string"},
-          "exact_angle": {"type": "number"},
-          "orb": {"type": "number"},
-          "applying": {"type": "boolean"}
+          "planet1": {
+            "type": "string"
+          },
+          "planet2": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "exact_angle": {
+            "type": "number"
+          },
+          "orb": {
+            "type": "number"
+          },
+          "applying": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ServiceDescription": {
+        "type": "object",
+        "properties": {
+          "texto": {
+            "type": "string"
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceArticleLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "descricao_completa": {
+            "$ref": "#/components/schemas/ServiceDescription"
+          },
+          "links_artigos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceArticleLink"
+            }
+          },
+          "categorias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tipo_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "Contato": {
+        "type": "object",
+        "properties": {
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          }
+        }
+      },
+      "RedesSociais": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string"
+          },
+          "youtube": {
+            "type": "string"
+          },
+          "tiktok": {
+            "type": "string"
+          }
+        }
+      },
+      "FAQItem": {
+        "type": "object",
+        "properties": {
+          "pergunta": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "biografia": {
+            "type": "string"
+          },
+          "citacao": {
+            "type": "string"
+          },
+          "contato": {
+            "$ref": "#/components/schemas/Contato"
+          },
+          "redes_sociais": {
+            "$ref": "#/components/schemas/RedesSociais"
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FAQItem"
+            }
+          }
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes_realizadas": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "satisfacao_media": {
+            "type": "number"
+          },
+          "avaliacoes": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProgressionsRequest": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "birth_time",
+          "birth_location",
+          "analysis_period"
+        ],
+        "properties": {
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "birth_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "birth_location": {
+            "type": "string"
+          },
+          "analysis_period": {
+            "type": "string"
+          }
+        }
+      },
+      "ProgressionsResponse": {
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string"
+          },
+          "birth_data": {
+            "type": "object"
+          },
+          "analysis_period": {
+            "type": "string"
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "cache": {
+            "type": "object"
+          }
+        }
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "object"
+          }
+        }
+      },
+      "ResolvedPreview": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "text_md": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReportGenerationResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
+          }
         }
       }
     }
