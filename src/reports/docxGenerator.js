@@ -2,14 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { getReportConfig } = require('../services/content.service');
-
-const TEMPLATE_MAP = {
-  natal: 'natal.docx',
-  solar_return: 'solar_return.docx',
-  synastry: 'synastry.docx',
-  predictions: 'predictions.docx',
-  progressions: 'progressions.docx'
-};
+const { ensureDocxTemplates, TEMPLATE_MAP } = require('../scripts/generate-docx-templates');
 
 const resolveSectionsOrder = (reportConfig, service) => {
   const configuredOrder = reportConfig?.sections_order;
@@ -113,6 +106,7 @@ const generateReportDocx = ({
   resolvedSections,
   outputPath
 }) => {
+  ensureDocxTemplates();
   const reportConfig = getReportConfig();
   const sectionsOrder = resolveSectionsOrder(reportConfig, service);
   const sections = resolvedSections?.sections || resolvedSections || {};
