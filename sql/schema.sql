@@ -44,8 +44,31 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   last_login TIMESTAMP,
+  last_login_at TIMESTAMP,
   is_active BOOLEAN DEFAULT true,
   is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS profiles (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  display_name VARCHAR(255) NOT NULL,
+  role VARCHAR(20) DEFAULT 'user',
+  phone VARCHAR(20),
+  locale VARCHAR(10) DEFAULT 'pt-BR',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS services (
+  id SERIAL PRIMARY KEY,
+  slug VARCHAR(50) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  price_cents INTEGER NOT NULL,
+  delivery_days_min INTEGER NOT NULL,
+  delivery_days_max INTEGER NOT NULL,
+  active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -53,13 +76,31 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  service_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
   order_number VARCHAR(50) UNIQUE,
   service_type VARCHAR(50),
-  status VARCHAR(50) DEFAULT 'pending',
+  status VARCHAR(50) DEFAULT 'draft',
   service_data JSONB,
   amount NUMERIC(10, 2),
   currency VARCHAR(3) DEFAULT 'BRL',
   amount_cents INTEGER,
+  session_id VARCHAR(100),
+  referrer TEXT,
+  landing_page TEXT,
+  utm_source VARCHAR(100),
+  utm_medium VARCHAR(100),
+  utm_campaign VARCHAR(150),
+  utm_content VARCHAR(150),
+  utm_term VARCHAR(150),
+  customer_name VARCHAR(255),
+  birth_date DATE,
+  birth_time VARCHAR(20),
+  birth_place_text VARCHAR(255),
+  birth_lat NUMERIC(10, 6),
+  birth_lng NUMERIC(10, 6),
+  timezone_offset INTEGER,
+  language VARCHAR(10),
+  notes TEXT,
   stripe_payment_intent_id VARCHAR(255),
   stripe_session_id VARCHAR(255),
   stripe_payment_id VARCHAR(255),
@@ -75,6 +116,57 @@ CREATE TABLE IF NOT EXISTS orders (
   email_sent_to_client BOOLEAN DEFAULT false,
   email_sent_at_client TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL,
+  provider_payment_id VARCHAR(255),
+  status VARCHAR(50) NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  raw_json JSONB
+);
+
+CREATE TABLE IF NOT EXISTS analytics_sessions (
+  session_id VARCHAR(100) PRIMARY KEY,
+  first_seen_at TIMESTAMP NOT NULL,
+  last_seen_at TIMESTAMP NOT NULL,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  utm_source VARCHAR(100),
+  utm_medium VARCHAR(100),
+  utm_campaign VARCHAR(150),
+  utm_content VARCHAR(150),
+  utm_term VARCHAR(150),
+  landing_page TEXT,
+  device VARCHAR(100),
+  country VARCHAR(100),
+  ip_hash VARCHAR(255) NOT NULL,
+  user_agent TEXT,
+  consent_analytics BOOLEAN DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id SERIAL PRIMARY KEY,
+  session_id VARCHAR(100) REFERENCES analytics_sessions(session_id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  event_name VARCHAR(100) NOT NULL,
+  page TEXT,
+  ts TIMESTAMP NOT NULL,
+  props_json JSONB,
+  referrer TEXT,
+  duration_ms INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id SERIAL PRIMARY KEY,
+  admin_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  action VARCHAR(100) NOT NULL,
+  target_type VARCHAR(100) NOT NULL,
+  target_id VARCHAR(100),
+  ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  meta_json JSONB
 );
 
 CREATE TABLE IF NOT EXISTS analyses (
@@ -129,8 +221,19 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_orders_expires_at ON orders(expires_at);
+CREATE INDEX IF NOT EXISTS idx_orders_service_id ON orders(service_id);
+CREATE INDEX IF NOT EXISTS idx_orders_session_id ON orders(session_id);
 CREATE INDEX IF NOT EXISTS idx_analysis_cache_hash ON analysis_cache(birth_data_hash);
 CREATE INDEX IF NOT EXISTS idx_analysis_cache_type ON analysis_cache(analysis_type);
 CREATE INDEX IF NOT EXISTS idx_email_logs_order_id ON email_logs(order_id);
 CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
 CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+CREATE INDEX IF NOT EXISTS idx_services_slug ON services(slug);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_user_id ON analytics_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_first_seen ON analytics_sessions(first_seen_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_session_id ON analytics_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_user_id ON analytics_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_ts ON analytics_events(ts);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_admin_user_id ON audit_logs(admin_user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_ts ON audit_logs(ts);

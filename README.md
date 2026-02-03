@@ -16,6 +16,13 @@ O comando usa o runner nativo do Node (`node --test`) para evitar dependências 
 npm config set registry https://registry.npmjs.org/
 ```
 
+### Seeds e manutenção
+
+```bash
+npm run seed:services
+npm run prune:analytics
+```
+
 Backend em FastAPI para cálculo de mapa natal usando Swiss Ephemeris (pyswisseph).
 
 ## Stack
@@ -54,8 +61,37 @@ git lfs pull
 | `ASTRO_RATE_LIMIT_WINDOW_SECONDS` | Janela em segundos | `60` |
 | `ASTRO_GEOCODE_USER_AGENT` | User agent para Nominatim | `astrolumen-api` |
 | `ASTRO_CORS_ORIGINS` | Lista CSV de origens permitidas no CORS | `http://localhost:5173` |
+| `ADMIN_EMAIL` | Email da administradora (Camila) | `camila@astrolumen.com` |
+| `IP_HASH_SALT` | Salt para hash de IP no tracking | `astrolumen` |
+| `ANALYTICS_RATE_LIMIT_MAX` | Limite de eventos por janela | `30` |
+| `ANALYTICS_RATE_LIMIT_WINDOW_MS` | Janela de rate limit (ms) | `60000` |
+| `ANALYTICS_RETENTION_DAYS` | Retenção de eventos analytics | `90` |
+| `STRIPE_WEBHOOK_SECRET` | Segredo de assinatura do webhook Stripe | `-` |
+| `STRIPE_SUCCESS_URL` | URL de sucesso do checkout | `https://astrolumen.com/checkout/success` |
+| `STRIPE_CANCEL_URL` | URL de cancelamento do checkout | `https://astrolumen.com/checkout/cancel` |
 
 ## Endpoints
+
+### Admin, Analytics, Serviços e Pedidos (Node/Express)
+
+```bash
+# tracking
+curl -X POST http://localhost:3000/v1/analytics/track \
+  -H "Content-Type: application/json" \
+  -d '{"event":"page_view","page":"/","session_id":"uuid","ts":"2025-01-01T12:00:00Z"}'
+
+# serviços
+curl http://localhost:3000/v1/services
+
+# criar pedido
+curl -X POST http://localhost:3000/v1/orders \
+  -H "Content-Type: application/json" \
+  -d '{"service_id":1,"customer_name":"Ana","birth_date":"1990-01-01","birth_time":"08:00","birth_place_text":"São Paulo"}'
+
+# resumo analytics (admin)
+curl http://localhost:3000/v1/analytics/summary?from=2025-01-01&to=2025-01-31 \
+  -H "Authorization: Bearer <token>"
+```
 
 ### GET /health
 
