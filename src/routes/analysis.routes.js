@@ -17,6 +17,9 @@ const {
   tokenizePredictions,
   tokenizeProgressions,
 } = require('../engine/tokenizer');
+const { tokenizeChart, normalizeServiceType } = require('../services/tokenizer.service');
+const { resolveSnippets } = require('../services/snippet-resolver.service');
+const contentLibrary = require('../../data/astrolumen_content_v1.json');
 
 const router = express.Router();
 
@@ -40,6 +43,45 @@ const buildLocationPayload = (payload) => {
 };
 
 const generateAnalysisId = () => crypto.randomUUID();
+const CONTENT_VERSION = contentLibrary?.meta?.content_version || 'v1';
+const CONTENT_SNIPPETS = contentLibrary?.interpretation_library?.snippets || [];
+
+const buildReportPreview = (chartResult, serviceType) => {
+  const normalizedService = normalizeServiceType(serviceType);
+  const tokens = tokenizeChart(chartResult, normalizedService);
+  const resolved = resolveSnippets(tokens, normalizedService, CONTENT_VERSION, CONTENT_SNIPPETS);
+  const resolvedSections = resolved.sections || {};
+  const selectedKeys = [];
+  const selectedKeysSet = new Set();
+  const resolvedPreviewSections = Object.entries(resolvedSections).reduce(
+    (acc, [sectionId, snippets]) => {
+      acc[sectionId] = (snippets || [])
+        .map((snippet) => ({
+          title: snippet.title,
+          text_md: snippet.text_md,
+          key: snippet.key,
+        }))
+        .filter((snippet) => snippet.title || snippet.text_md || snippet.key);
+      for (const snippet of snippets || []) {
+        if (snippet?.key && !selectedKeysSet.has(snippet.key)) {
+          selectedKeysSet.add(snippet.key);
+          selectedKeys.push(snippet.key);
+        }
+      }
+      return acc;
+    },
+    {}
+  );
+  return {
+    content_version: resolved.content_version,
+    tokens,
+    sections: resolvedSections,
+    resolved_preview: {
+      sections: resolvedPreviewSections,
+    },
+    selected_keys: selectedKeys,
+  };
+};
 
 const buildPreview = (service, tokens) => {
   const contentVersion = contentStore.getMeta().content_version || 'v1';
@@ -84,6 +126,14 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
         aspects: cached.aspects_data,
       });
       const preview = buildPreview('natal', tokens);
+      const reportPreview = buildReportPreview(
+        {
+          planets: cached.ephemeris_data,
+          houses: cached.houses_data,
+          aspects: cached.aspects_data,
+        },
+        'natal'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -95,6 +145,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
         houses: cached.houses_data,
         aspects: cached.aspects_data,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('natal_chart'),
         cache: { hit: true },
         ...preview,
@@ -124,6 +175,8 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
 
     const tokens = tokenizeNatal(chartData);
     const preview = buildPreview('natal', tokens);
+    const reportPreview = buildReportPreview(chartData, 'natal');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -136,6 +189,7 @@ router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) =
       aspects: chartData.aspects,
       interpretations,
       summary: analysis,
+      report_preview: reportPreview,
       pricing: getPricing('natal_chart'),
       cache: { hit: false },
       ...preview,
@@ -171,6 +225,14 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
         aspects: cached.aspects_data,
       });
       const preview = buildPreview('solar_return', tokens);
+      const reportPreview = buildReportPreview(
+        {
+          planets: cached.ephemeris_data?.planets || cached.ephemeris_data,
+          houses: cached.houses_data,
+          aspects: cached.aspects_data,
+        },
+        'solar_return'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -183,6 +245,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
         houses: cached.houses_data,
         aspects: cached.aspects_data,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('solar_return'),
         cache: { hit: true },
         ...preview,
@@ -212,6 +275,8 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
 
     const tokens = tokenizeSolarReturn(solarReturn.chart);
     const preview = buildPreview('solar_return', tokens);
+    const reportPreview = buildReportPreview(solarReturn.chart, 'solar_return');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -224,6 +289,7 @@ router.post('/solar-return', authMiddleware.authenticateToken, async (req, res) 
       houses: solarReturn.chart.houses,
       aspects: solarReturn.chart.aspects,
       interpretations,
+      report_preview: reportPreview,
       pricing: getPricing('solar_return'),
       cache: { hit: false },
       ...preview,
@@ -262,6 +328,12 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
     if (cached) {
       const tokens = tokenizeSynastry({ aspects: cached.aspects_data });
       const preview = buildPreview('synastry', tokens);
+      const reportPreview = buildReportPreview(
+        {
+          aspects: cached.aspects_data,
+        },
+        'synastry'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         person1: cached.ephemeris_data?.person1,
@@ -269,6 +341,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
         aspects: cached.aspects_data,
         compatibility_areas: cached.ephemeris_data?.compatibilityAreas,
         interpretations: cached.interpretations,
+        report_preview: reportPreview,
         pricing: getPricing('synastry'),
         cache: { hit: true },
         ...preview,
@@ -369,6 +442,8 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
 
     const tokens = tokenizeSynastry({ aspects: keyAspects });
     const preview = buildPreview('synastry', tokens);
+    const reportPreview = buildReportPreview({ aspects: keyAspects }, 'synastry');
+
     return res.json({
       analysis_id: generateAnalysisId(),
       person1: personSummary1,
@@ -376,6 +451,7 @@ router.post('/synastry', authMiddleware.authenticateToken, async (req, res) => {
       aspects: keyAspects,
       compatibility_areas: compatibilityAreas,
       interpretations,
+      report_preview: reportPreview,
       pricing: getPricing('synastry'),
       cache: { hit: false },
       ...preview,
@@ -414,6 +490,12 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       }));
       const tokens = tokenizePredictions({ transits });
       const preview = buildPreview('predictions', tokens);
+      const reportPreview = buildReportPreview(
+        {
+          current_transits: cached.ephemeris_data?.currentTransits,
+        },
+        'predictions'
+      );
       return res.json({
         analysis_id: generateAnalysisId(),
         birth_data: {
@@ -425,6 +507,7 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
         forecasts: cached.ephemeris_data?.forecasts,
         critical_periods: cached.ephemeris_data?.criticalPeriods,
         recommendations: cached.ephemeris_data?.recommendations,
+        report_preview: reportPreview,
         pricing: getPricing('predictions'),
         cache: { hit: true },
         ...preview,
@@ -497,6 +580,13 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       })),
     });
     const preview = buildPreview('predictions', tokens);
+    const reportPreview = buildReportPreview(
+      {
+        current_transits: currentTransits,
+      },
+      'predictions'
+    );
+
     return res.json({
       analysis_id: generateAnalysisId(),
       birth_data: {
@@ -508,6 +598,7 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
       forecasts,
       critical_periods: criticalPeriods,
       recommendations,
+      report_preview: reportPreview,
       pricing: getPricing('predictions'),
       cache: { hit: false },
       ...preview,
@@ -592,6 +683,86 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
       pricing: getPricing('progressions'),
       cache: { hit: false },
       ...preview,
+    });
+  } catch (error) {
+    console.error('Erro:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/progressions', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const payload = normalizeBirthPayload(req.body);
+    const analysisPeriod = req.body.analysisPeriod || req.body.analysis_period;
+
+    if (!payload.birthDate || !payload.birthLocation || !analysisPeriod) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const locationPayload = buildLocationPayload(payload);
+    const cacheHash = analysisCacheService.buildHash({
+      type: 'progressions',
+      birthDate: payload.birthDate,
+      birthTime: payload.birthTime,
+      location: locationPayload,
+      analysisPeriod,
+    });
+
+    const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'progressions');
+    if (cached) {
+      const reportPreview = buildReportPreview({}, 'progressions');
+      return res.json({
+        analysis_id: generateAnalysisId(),
+        birth_data: {
+          date: payload.birthDate,
+          time: payload.birthTime,
+          location: payload.birthLocation,
+        },
+        analysis_period: analysisPeriod,
+        highlights: cached.ephemeris_data?.highlights,
+        recommendations: cached.ephemeris_data?.recommendations,
+        report_preview: reportPreview,
+        pricing: getPricing('progressions'),
+        cache: { hit: true },
+      });
+    }
+
+    const highlights = [
+      'Fase de amadurecimento emocional com foco em escolhas conscientes.',
+      'Mudanças internas pedem atenção ao autocuidado e à rotina.',
+      'Período favorável para revisar metas pessoais e profissionais.',
+    ];
+
+    const recommendations = [
+      'Observe padrões repetitivos e busque novas respostas internas.',
+      'Reserve tempo para práticas de autoconhecimento.',
+    ];
+
+    await analysisCacheService.storeCachedAnalysis(cacheHash, 'progressions', {
+      ephemeris: {
+        highlights,
+        recommendations,
+      },
+      houses: {},
+      aspects: [],
+      interpretations: [],
+    });
+
+    const reportPreview = buildReportPreview({}, 'progressions');
+
+    return res.json({
+      analysis_id: generateAnalysisId(),
+      birth_data: {
+        date: payload.birthDate,
+        time: payload.birthTime,
+        location: payload.birthLocation,
+      },
+      analysis_period: analysisPeriod,
+      highlights,
+      recommendations,
+      report_preview: reportPreview,
+      pricing: getPricing('progressions'),
+      cache: { hit: false },
     });
   } catch (error) {
     console.error('Erro:', error);
