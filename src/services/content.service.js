@@ -15,6 +15,19 @@ const getPosts = () =>
     data_publicacao: post.data_publicacao,
     imagem: post.imagem
   }));
+const getReportConfig = () => contentStore.getReportConfig();
+const getHoroscopeDaily = (sign) => contentStore.getHoroscopeDaily(sign);
+
+const getPosts = () =>
+  contentStore.getPosts().map(({ id, titulo, resumo, autor, data_publicacao, imagem }) => ({
+    id,
+    titulo,
+    resumo,
+    autor,
+    data_publicacao,
+    imagem
+  }));
+
 const getPostById = (id) => contentStore.getPost(id);
 
 module.exports = {
@@ -23,6 +36,8 @@ module.exports = {
   getProfile,
   getFaq,
   getStats,
+  getReportConfig,
+  getHoroscopeDaily,
   getPosts,
   getPostById
 };

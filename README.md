@@ -34,6 +34,15 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Git LFS
+
+Os templates `.docx` ficam sob Git LFS em `templates/*.docx`. Em ambientes de CI/PR builder, instale o Git LFS e faça o pull dos arquivos após o checkout:
+
+```bash
+git lfs install
+git lfs pull
+```
+
 ## Variáveis de ambiente
 
 | Variável | Descrição | Default |

@@ -3,6 +3,11 @@ const contentStore = require('../content/contentStore');
 const getDailyHoroscope = (sign) => {
   const key = (sign || '').toLowerCase();
   const texto = contentStore.getHoroscopeDaily(key);
+const { getHoroscopeDaily } = require('./content.service');
+
+const getDailyHoroscope = (sign) => {
+  const key = (sign || '').toLowerCase();
+  const texto = getHoroscopeDaily(key);
 
   if (!texto) {
     return null;

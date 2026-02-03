@@ -396,6 +396,24 @@
         "responses": {
           "200": {
             "description": "Resposta de análise",
+        "summary": "Gera análise de progressões secundárias",
+    "/api/admin/content/import": {
+      "post": {
+        "summary": "Importa conteúdo versionado completo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressionsRequest"
+                "$ref": "#/components/schemas/VersionedContentFull"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prévia da análise de progressões",
             "content": {
               "application/json": {
                 "schema": {
@@ -403,6 +421,21 @@
                 }
               }
             }
+          "201": {
+            "description": "Conteúdo importado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminContentImportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Schema inválido"
+          },
+          "500": {
+            "description": "Erro ao importar conteúdo"
           }
         }
       }
@@ -443,6 +476,20 @@
           },
           "400": {
             "description": "Conteúdo inválido"
+        "summary": "Exporta conteúdo versionado completo",
+        "responses": {
+          "200": {
+            "description": "Conteúdo versionado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionedContentFull"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao exportar conteúdo"
           }
         }
       }
@@ -480,6 +527,7 @@
             }
           }
         ],
+        "summary": "Lista snippets de interpretação",
         "responses": {
           "200": {
             "description": "Lista de snippets",
@@ -493,11 +541,15 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Erro ao listar snippets"
           }
         }
       },
       "post": {
         "summary": "Adiciona snippet",
+        "summary": "Cria snippet de interpretação",
         "requestBody": {
           "required": true,
           "content": {
@@ -531,12 +583,35 @@
             }
           }
         ],
+            "description": "Snippet criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snippet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Snippet inválido"
+          },
+          "409": {
+            "description": "Chave duplicada"
+          },
+          "500": {
+            "description": "Erro ao criar snippet"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Atualiza snippet de interpretação",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Snippet"
+                "$ref": "#/components/schemas/AdminSnippetUpdate"
               }
             }
           }
@@ -547,6 +622,26 @@
           },
           "404": {
             "description": "Snippet não encontrado"
+            "description": "Snippet atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snippet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Atualização inválida"
+          },
+          "404": {
+            "description": "Snippet não encontrado"
+          },
+          "409": {
+            "description": "Chave duplicada"
+          },
+          "500": {
+            "description": "Erro ao atualizar snippet"
           }
         }
       }
@@ -554,6 +649,7 @@
     "/api/admin/reports/{orderId}/generate": {
       "post": {
         "summary": "Gera relatório DOCX para pedido",
+        "summary": "Gera relatório administrativamente",
         "parameters": [
           {
             "name": "orderId",
@@ -561,6 +657,7 @@
             "required": true,
             "schema": {
               "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -639,6 +736,118 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PredictionsAnalysisResponse"
+                  "$ref": "#/components/schemas/AdminReportGenerateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Não autorizado"
+          },
+          "404": {
+            "description": "Pedido não encontrado"
+          }
+        }
+      }
+    },
+    "/api/horoscope/daily": {
+      "get": {
+        "summary": "Horóscopo diário",
+        "parameters": [
+          {
+            "name": "sign",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "aries",
+                "taurus",
+                "gemini",
+                "cancer",
+                "leo",
+                "virgo",
+                "libra",
+                "scorpio",
+                "sagittarius",
+                "capricorn",
+                "aquarius",
+                "pisces"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horóscopo diário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Horoscope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Signo inválido"
+          }
+        }
+      }
+    },
+    "/api/analysis/progressions": {
+      "post": {
+        "summary": "Gera análise de progressões secundárias",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prévia da análise de progressões",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressionsResponse"
+                },
+                "example": {
+                  "analysis_id": "e2c1d7c4-9b1d-4c8b-842f-1e3e0d6c6af2",
+                  "birth_data": {
+                    "date": "1992-03-12",
+                    "time": "08:45",
+                    "location": "São Paulo, BR"
+                  },
+                  "analysis_period": "12_months",
+                  "highlights": [
+                    "Fase de amadurecimento emocional com foco em escolhas conscientes.",
+                    "Mudanças internas pedem atenção ao autocuidado e à rotina."
+                  ],
+                  "recommendations": [
+                    "Reserve tempo para práticas de autoconhecimento."
+                  ],
+                  "report_preview": {
+                    "content_version": "v1",
+                    "tokens": [],
+                    "sections": {
+                      "resumo": [],
+                      "identidade": [],
+                      "relacoes": [],
+                      "carreira": [],
+                      "ciclos": []
+                    }
+                  },
+                  "pricing": {
+                    "price": 227,
+                    "currency": "BRL"
+                  },
+                  "cache": {
+                    "hit": false
+                  }
                 }
               }
             }
@@ -1109,9 +1318,1087 @@
                 "type": "array",
                 "items": {
                   "type": "string"
+            }
+          }
+        }
+      },
+      "ServiceArticleLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "descricao_completa": {
+            "$ref": "#/components/schemas/ServiceDescription"
+          },
+          "links_artigos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceArticleLink"
+            }
+          },
+          "categorias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tipo_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "Contato": {
+        "type": "object",
+        "properties": {
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          }
+        }
+      },
+      "RedesSociais": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string"
+          },
+          "youtube": {
+            "type": "string"
+          },
+          "tiktok": {
+            "type": "string"
+          }
+        }
+      },
+      "FAQItem": {
+        "type": "object",
+        "properties": {
+          "pergunta": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "biografia": {
+            "type": "string"
+          },
+          "citacao": {
+            "type": "string"
+          },
+          "contato": {
+            "$ref": "#/components/schemas/Contato"
+          },
+          "redes_sociais": {
+            "$ref": "#/components/schemas/RedesSociais"
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FAQItem"
+            }
+          }
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               }
             }
+          }
+        ]
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes_realizadas": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "satisfacao_media": {
+            "type": "number"
+          },
+          "avaliacoes": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "q": "Mapa astral é previsão?",
+          "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "slug": "natal-chart",
+          "nome": "Mapa Astral",
+          "preco": 197,
+          "prazo_entrega": "3–5 dias úteis",
+          "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
+          "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
+          "para_quem_e": [
+            "Quem busca autoconhecimento com base técnica",
+            "Quem vive momentos de transição",
+            "Quem deseja compreender padrões pessoais"
+          ],
+          "inclui": [
+            "10 planetas",
+            "12 casas astrológicas",
+            "Aspectos planetários",
+            "Nodos lunares",
+            "Relatório profissional em WORD",
+            "Revisão humana pela Camila"
+          ],
+          "como_funciona": [
+            "Você preenche seus dados de nascimento",
+            "O sistema gera a base técnica",
+            "Camila revisa e valida o relatório",
+            "Você recebe o relatório final por e-mail"
+          ],
+          "beneficios": [
+            "Autoconhecimento técnico",
+            "Clareza sobre padrões de vida",
+            "Base sólida para decisões"
+          ],
+          "faq": [
+            {
+              "q": "Mapa astral é previsão?",
+              "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+            }
+          ],
+          "cta_label": "Gerar meu mapa astral",
+          "imagem": "/images/servicos/mapa-astral.png",
+          "tags": [
+            "autoconhecimento",
+            "identidade",
+            "ciclos"
+          ]
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "autor": "Dane Rudhyar",
+          "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+          "instagram": "https://instagram.com/astrologacamila",
+          "email": "astrologacamila@gmail.com"
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        },
+        "example": {
+          "nome": "Camila Veloso",
+          "titulo": "Astróloga Profissional",
+          "foto": "/images/camila.png",
+          "formacao": "Formada em Astrologia pela Escola GAIA",
+          "inicio_estudos": 2019,
+          "experiencia": "10+ anos",
+          "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+          "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
+          "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
+          "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
+          "citacao": {
+            "autor": "Dane Rudhyar",
+            "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+          },
+          "especialidades": [
+            "Mapa natal",
+            "Revolução solar",
+            "Progressões"
+          ],
+          "beneficios": [
+            "Leituras técnicas e aplicáveis",
+            "Clareza sobre ciclos"
+          ],
+          "contato": {
+            "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+            "instagram": "https://instagram.com/astrologacamila",
+            "email": "astrologacamila@gmail.com"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "q": "Astrologia é previsão?",
+          "a": "Não. A astrologia descreve padrões simbólicos e ciclos, não determina o futuro."
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "id": 1,
+          "titulo": "Mercúrio retrógrado: mitos e verdades",
+          "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+          "autor": "Camila Veloso",
+          "data_publicacao": "2024-05-10",
+          "imagem": "/images/posts/mercurio-retrogrado.png"
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": 1,
+          "titulo": "Mercúrio retrógrado: mitos e verdades",
+          "resumo": "Entenda como Mercúrio retrógrado afeta comunicação e contratos.",
+          "autor": "Camila Veloso",
+          "data_publicacao": "2024-05-10",
+          "imagem": "/images/posts/mercurio-retrogrado.png",
+          "conteudo": "# Mercúrio retrógrado\n\nMercúrio retrógrado é um convite à revisão. Em vez de medo, pense em ajustes finos, reavaliação de contratos e comunicação mais consciente."
+        }
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "interpretacoes": 881,
+          "mapas_gerados": 5000,
+          "avaliacao_media": 4.9,
+          "anos_experiencia": 10,
+          "prazo_medio_entrega": "3–5 dias úteis"
+        }
+      },
+      "Horoscope": {
+      "ContentMeta": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "InterpretationSnippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "InterpretationLibrary": {
+        "type": "object",
+        "properties": {
+          "snippets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterpretationSnippet"
+            }
+          }
+        }
+      },
+      "ReportSectionConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReportConfig": {
+        "type": "object",
+        "properties": {
+          "section_limits": {
+            "type": "object",
+            "properties": {
+              "resumo": {
+                "type": "integer"
+              },
+              "identidade": {
+                "type": "integer"
+              },
+              "relacoes": {
+                "type": "integer"
+              },
+              "carreira": {
+                "type": "integer"
+              },
+              "ciclos": {
+                "type": "integer"
+              }
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportSectionConfig"
+            }
+          }
+        }
+      },
+      "ContentFull": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ContentProfile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ContentStats"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentService"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFaqItem"
+            }
+          },
+          "interpretation_library": {
+            "$ref": "#/components/schemas/InterpretationLibrary"
+          },
+          "report_config": {
+            "$ref": "#/components/schemas/ReportConfig"
+          }
+        }
+      },
+      "Horoscope": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "example": {
+          "sign": "aries",
+          "texto": "O dia favorece decisões conscientes e observação dos próprios impulsos.",
+          "data": "2024-10-10"
+        }
+      },
+      "ContentMetaDefaults": {
+        "type": "object",
+        "properties": {
+          "report_config": {
+            "$ref": "#/components/schemas/ReportConfig"
+          }
+        },
+        "example": {
+          "report_config": {
+            "sections": [
+              "resumo",
+              "identidade",
+              "relacoes",
+              "carreira",
+              "ciclos"
+            ],
+            "section_limits": {
+              "resumo": 3,
+              "identidade": 6,
+              "relacoes": 6,
+              "carreira": 6,
+              "ciclos": 6
+            }
+          }
+        }
+      },
+      "ReportConfig": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "resumo",
+                "identidade",
+                "relacoes",
+                "carreira",
+                "ciclos"
+              ]
+            }
+          },
+          "section_limits": {
+            "type": "object",
+            "properties": {
+              "resumo": {
+                "type": "integer"
+              },
+              "identidade": {
+                "type": "integer"
+              },
+              "relacoes": {
+                "type": "integer"
+              },
+              "carreira": {
+                "type": "integer"
+              },
+              "ciclos": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "example": {
+          "sections": [
+            "resumo",
+            "identidade",
+            "relacoes",
+            "carreira",
+            "ciclos"
+          ],
+          "section_limits": {
+            "resumo": 3,
+            "identidade": 6,
+            "relacoes": 6,
+            "carreira": 6,
+            "ciclos": 6
+          }
+        }
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "type": "planet_sign_house",
+          "key": "sun_aries_house_8",
+          "title": "Sol em Áries na Casa 8",
+          "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+          "priority": 90,
+          "service_scopes": [
+            "natal"
+          ],
+          "tags": [
+            "identidade",
+            "transformacao"
+          ]
+        }
+      },
+      "ContentMeta": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "defaults": {
+            "$ref": "#/components/schemas/ContentMetaDefaults"
+          }
+        },
+        "example": {
+          "content_version": "v1",
+          "lang": "pt-BR",
+          "last_updated": "2026-02-02",
+          "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+          "defaults": {
+            "report_config": {
+              "sections": [
+                "resumo",
+                "identidade",
+                "relacoes",
+                "carreira",
+                "ciclos"
+              ],
+              "section_limits": {
+                "resumo": 3,
+                "identidade": 6,
+                "relacoes": 6,
+                "carreira": 6,
+                "ciclos": 6
+              }
+            }
+          }
+        }
+      },
+      "ContentInterpretationLibrary": {
+        "type": "object",
+        "properties": {
+          "snippets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Snippet"
+            }
+          }
+        },
+        "example": {
+          "snippets": [
+            {
+              "type": "planet_sign_house",
+              "key": "sun_aries_house_8",
+              "title": "Sol em Áries na Casa 8",
+              "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+              "priority": 90,
+              "service_scopes": [
+                "natal"
+              ],
+              "tags": [
+                "identidade",
+                "transformacao"
+              ]
+            }
+          ]
+        }
+      },
+      "VersionedContent": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ContentProfile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ContentStats"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentService"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFaqItem"
+            }
+          },
+          "interpretation_library": {
+            "$ref": "#/components/schemas/ContentInterpretationLibrary"
+          }
+        },
+        "example": {
+          "meta": {
+            "content_version": "v1",
+            "lang": "pt-BR",
+            "last_updated": "2026-02-02",
+            "notes": "Base técnica de interpretações astrológicas. Conteúdo determinístico.",
+            "defaults": {
+              "report_config": {
+                "sections": [
+                  "resumo",
+                  "identidade",
+                  "relacoes",
+                  "carreira",
+                  "ciclos"
+                ],
+                "section_limits": {
+                  "resumo": 3,
+                  "identidade": 6,
+                  "relacoes": 6,
+                  "carreira": 6,
+                  "ciclos": 6
+                }
+              }
+            }
+          },
+          "profile": {
+            "nome": "Camila Veloso",
+            "titulo": "Astróloga Profissional",
+            "foto": "/images/camila.png",
+            "formacao": "Formada em Astrologia pela Escola GAIA",
+            "inicio_estudos": 2019,
+            "experiencia": "10+ anos",
+            "abordagem": "Astrologia técnica aplicada à compreensão de ciclos, tendências e padrões de vida.",
+            "biografia_curta": "Astróloga profissional com atuação focada em análises técnicas e leituras aprofundadas do mapa natal e de ciclos astrológicos.",
+            "biografia_longa": "Camila Veloso atua com astrologia como ferramenta de leitura simbólica e técnica do mapa astral, ciclos planetários e tendências temporais. Seu trabalho é baseado em fundamentos clássicos e modernos da astrologia, com análises detalhadas e estruturadas, entregues em relatórios profissionais revisados manualmente.",
+            "missao": "Oferecer análises astrológicas claras, técnicas e aplicáveis à vida prática.",
+            "citacao": {
+              "autor": "Dane Rudhyar",
+              "texto": "Astrologia é uma linguagem. Se você entender essa linguagem, o céu fala com você."
+            },
+            "especialidades": [
+              "Mapa natal",
+              "Revolução solar",
+              "Progressões"
+            ],
+            "beneficios": [
+              "Leituras técnicas e aplicáveis",
+              "Clareza sobre ciclos"
+            ],
+            "contato": {
+              "whatsapp": "https://web.whatsapp.com/send?phone=5511992953322&text=Olá%2C%20Estou%20interessada%20nos%20seus%20serviços%20astrológicos.%20Poderia%20me%20falar%20mais%20sobre%3F",
+              "instagram": "https://instagram.com/astrologacamila",
+              "email": "astrologacamila@gmail.com"
+            }
+          },
+          "stats": {
+            "interpretacoes": 881,
+            "mapas_gerados": 5000,
+            "avaliacao_media": 4.9,
+            "anos_experiencia": 10,
+            "prazo_medio_entrega": "3–5 dias úteis"
+          },
+          "services": [
+            {
+              "slug": "natal-chart",
+              "nome": "Mapa Astral",
+              "preco": 197,
+              "prazo_entrega": "3–5 dias úteis",
+              "resumo": "Leitura técnica da personalidade, padrões e potenciais com base no mapa natal.",
+              "descricao": "O mapa astral é uma ferramenta técnica que analisa a posição de planetas, signos e casas no nascimento, revelando padrões, potenciais e desafios de vida.",
+              "para_quem_e": [
+                "Quem busca autoconhecimento com base técnica",
+                "Quem vive momentos de transição",
+                "Quem deseja compreender padrões pessoais"
+              ],
+              "inclui": [
+                "10 planetas",
+                "12 casas astrológicas",
+                "Aspectos planetários",
+                "Nodos lunares",
+                "Relatório profissional em WORD",
+                "Revisão humana pela Camila"
+              ],
+              "como_funciona": [
+                "Você preenche seus dados de nascimento",
+                "O sistema gera a base técnica",
+                "Camila revisa e valida o relatório",
+                "Você recebe o relatório final por e-mail"
+              ],
+              "beneficios": [
+                "Autoconhecimento técnico",
+                "Clareza sobre padrões de vida",
+                "Base sólida para decisões"
+              ],
+              "faq": [
+                {
+                  "q": "Mapa astral é previsão?",
+                  "a": "Não. O mapa astral descreve padrões e potenciais, não determina acontecimentos."
+                }
+              ],
+              "cta_label": "Gerar meu mapa astral",
+              "imagem": "/images/servicos/mapa-astral.png",
+              "tags": [
+                "autoconhecimento",
+                "identidade",
+                "ciclos"
+              ]
+            }
+          ],
+          "faq": [
+            {
+              "q": "Astrologia é previsão?",
+              "a": "Não. A astrologia descreve padrões simbólicos e ciclos, não determina o futuro."
+            }
+          ],
+          "interpretation_library": {
+            "snippets": [
+              {
+                "type": "planet_sign_house",
+                "key": "sun_aries_house_8",
+                "title": "Sol em Áries na Casa 8",
+                "text_md": "O Sol em Áries na Casa 8 indica identidade marcada por iniciativa diante de transformações e intensa busca por autonomia.",
+                "priority": 90,
+                "service_scopes": [
+                  "natal"
+                ],
+                "tags": [
+                  "identidade",
+                  "transformacao"
+                ]
+              }
+            ]
           }
         ]
       },
@@ -1165,6 +2452,95 @@
             "type": "string"
           },
           "para_quem_e": {
+      "ContentHoroscope": {
+        "type": "object",
+        "properties": {
+          "daily": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HoroscopeDaily"
+            }
+          },
+          "tipo_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "Contato": {
+        "type": "object",
+        "properties": {
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          }
+        }
+      },
+      "RedesSociais": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string"
+          },
+          "youtube": {
+            "type": "string"
+          },
+          "tiktok": {
+            "type": "string"
+          }
+        }
+      },
+      "FAQItem": {
+        "type": "object",
+        "properties": {
+          "pergunta": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "biografia": {
+            "type": "string"
+          },
+          "citacao": {
+            "type": "string"
+          },
+          "contato": {
+            "$ref": "#/components/schemas/Contato"
+          },
+          "redes_sociais": {
+            "$ref": "#/components/schemas/RedesSociais"
+      "VersionedContentFull": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ContentMeta"
+          },
+          "build_notes": {
             "type": "array",
             "items": {
               "type": "string"
@@ -1191,6 +2567,14 @@
           "faq": {
             "type": "array",
             "items": {
+              "$ref": "#/components/schemas/FAQItem"
+            }
+          }
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
               "$ref": "#/components/schemas/ContentServiceFaqItem"
             }
           },
@@ -1276,6 +2660,480 @@
             }
           },
           "beneficios": {
+          "profile": {
+            "$ref": "#/components/schemas/ContentProfile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ContentStats"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentService"
+            }
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentPost"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFaqItem"
+            }
+          },
+          "horoscope": {
+            "$ref": "#/components/schemas/ContentHoroscope"
+          },
+          "report_config": {
+            "$ref": "#/components/schemas/ReportConfig"
+          },
+          "interpretation_library": {
+            "$ref": "#/components/schemas/ContentInterpretationLibrary"
+          }
+        }
+      },
+      "ReportPreview": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PostSummary"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
+            "type": "string"
+          }
+        }
+      },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProgressionsRequest": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Snippet"
+              }
+            }
+          }
+        ]
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes_realizadas": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "satisfacao_media": {
+            "type": "number"
+          },
+          "avaliacoes": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
+      "SelectedKeys": {
+        "type": "object",
+        "properties": {
+          "all": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ResolvedPreview": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Snippet"
+              }
+            }
+          }
+        }
+      },
+      "Debug": {
+        "type": "object",
+        "properties": {
+          "selected_keys": {
+            "$ref": "#/components/schemas/SelectedKeys"
+          },
+          "token_count": {
+            "type": "integer"
+          },
+          "snippet_count": {
+            "type": "integer"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
+          }
+        }
+      },
+      "AdminContentImportResponse": {
+        "type": "object",
+        "required": [
+          "birth_date",
+          "birth_time",
+          "birth_location",
+          "analysis_period"
+        ],
+        "properties": {
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "birth_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "birth_location": {
+            "type": "string"
+          },
+          "analysis_period": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ProgressionsResponse": {
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string"
+          },
+          "birth_data": {
+            "type": "object"
+          },
+          "analysis_period": {
+            "type": "string"
+          },
+          "highlights": {
+      "AdminSnippetUpdate": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
+          },
+          "recommendations": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "cache": {
+            "type": "object"
+          }
+        }
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beneficios": {
+          "sections": {
             "type": "array",
             "items": {
               "type": "string"
@@ -1353,6 +3211,52 @@
             "type": "integer"
           },
           "prazo_medio_entrega": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "object"
+          }
+        }
+      },
+      "ResolvedPreview": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "text_md": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReportGenerationResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "file_path": {
             "type": "string"
           }
         }
@@ -1369,6 +3273,26 @@
           "data": {
             "type": "string",
             "format": "date"
+      "AdminReportGenerateResponse": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "resolved_preview": {
+            "$ref": "#/components/schemas/ResolvedPreview"
+          },
+          "selected_keys": {
+            "$ref": "#/components/schemas/SelectedKeys"
+          },
+          "debug": {
+            "$ref": "#/components/schemas/Debug"
           }
         }
       },
@@ -1510,6 +3434,37 @@
           },
           "text_md": {
             "type": "string"
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string"
+          },
+          "birth_data": {
+            "type": "object"
+          },
+          "analysis_period": {
+            "type": "string"
+          },
+          "report_preview": {
+            "$ref": "#/components/schemas/ReportPreview"
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pricing": {
+            "type": "object"
+          },
+          "cache": {
+            "type": "object"
           }
         }
       },
@@ -1555,4 +3510,5 @@
       }
     }
   }
+}
 }

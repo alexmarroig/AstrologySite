@@ -14,6 +14,11 @@ const listServices = withErrorHandling((req, res) => {
 });
 
 const getService = withErrorHandling((req, res) => {
+const listServices = (req, res) => {
+  res.json(contentService.getServices());
+};
+
+const getService = (req, res) => {
   const service = contentService.getServiceBySlug(req.params.slug);
 
   if (!service) {
@@ -36,6 +41,21 @@ const listPosts = withErrorHandling((req, res) => {
 });
 
 const getPost = withErrorHandling((req, res) => {
+};
+
+const getProfile = (req, res) => {
+  res.json(contentService.getProfile());
+};
+
+const getFaq = (req, res) => {
+  res.json(contentService.getFaq());
+};
+
+const listPosts = (req, res) => {
+  res.json(contentService.getPosts());
+};
+
+const getPost = (req, res) => {
   const post = contentService.getPostById(req.params.id);
 
   if (!post) {
@@ -48,6 +68,11 @@ const getPost = withErrorHandling((req, res) => {
 const getStats = withErrorHandling((req, res) => {
   res.json(contentService.getStats());
 });
+};
+
+const getStats = (req, res) => {
+  res.json(contentService.getStats());
+};
 
 module.exports = {
   listServices,
