@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { getReportConfig } = require('../services/content.service');
+const { ensureDocxTemplates } = require('../scripts/generate-docx-templates');
 
 const TEMPLATE_MAP = {
   natal: 'natal.docx',
@@ -9,6 +10,14 @@ const TEMPLATE_MAP = {
   synastry: 'synastry.docx',
   predictions: 'predictions.docx',
   progressions: 'progressions.docx'
+};
+
+let templatesReadyPromise;
+const ensureTemplatesReady = () => {
+  if (!templatesReadyPromise) {
+    templatesReadyPromise = ensureDocxTemplates();
+  }
+  return templatesReadyPromise;
 };
 
 const resolveSectionsOrder = (reportConfig, service) => {
@@ -106,13 +115,14 @@ const buildReportBody = ({ service, clientName, chartData, sectionsOrder, sectio
     .join('\n\n');
 };
 
-const generateReportDocx = ({
+const generateReportDocx = async ({
   service,
   clientName,
   chartData,
   resolvedSections,
   outputPath
 }) => {
+  await ensureTemplatesReady();
   const reportConfig = getReportConfig();
   const sectionsOrder = resolveSectionsOrder(reportConfig, service);
   const sections = resolvedSections?.sections || resolvedSections || {};
