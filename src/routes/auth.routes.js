@@ -23,6 +23,21 @@ const buildTokens = (payload) => {
   };
 };
 
+const ensureProfile = async (client, user) => {
+  const profileResult = await client.query('SELECT user_id, role FROM profiles WHERE user_id = $1', [
+    user.id,
+  ]);
+  if (profileResult.rows.length > 0) {
+    return profileResult.rows[0];
+  }
+
+  const insertResult = await client.query(
+    'INSERT INTO profiles (user_id, display_name, role, phone, locale) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, role',
+    [user.id, user.name, 'user', user.phone || null, 'pt-BR']
+  );
+  return insertResult.rows[0];
+};
+
 router.post('/register', async (req, res) => {
   try {
     const { email, name, full_name: fullName, password, phone } = req.body;
@@ -32,13 +47,32 @@ router.post('/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const result = await db.query(
-      'INSERT INTO users (email, name, password_hash, phone) VALUES ($1, $2, $3, $4) RETURNING id, email, name, phone',
-      [email.toLowerCase(), resolvedName, passwordHash, phone || null]
-    );
+    const client = await db.getClient();
+    let user;
+    let profile;
 
-    const user = result.rows[0];
-    const tokens = buildTokens({ id: user.id, email: user.email, name: user.name });
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        'INSERT INTO users (email, name, password_hash, phone) VALUES ($1, $2, $3, $4) RETURNING id, email, name, phone',
+        [email.toLowerCase(), resolvedName, passwordHash, phone || null]
+      );
+      user = result.rows[0];
+      profile = await ensureProfile(client, user);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+    const tokens = buildTokens({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: profile.role,
+    });
 
     return res.status(201).json({
       id: user.id,
@@ -48,7 +82,7 @@ router.post('/register', async (req, res) => {
       access_token: tokens.accessToken,
       refresh_token: tokens.refreshToken,
       expires_in: 86400,
-      user,
+      user: { ...user, role: profile.role },
       token: tokens.accessToken,
     });
   } catch (error) {
@@ -86,9 +120,26 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Usuário desativado' });
     }
 
-    const tokens = buildTokens({ id: user.id, email: user.email, name: user.name });
+    let profileResult = await db.query('SELECT role FROM profiles WHERE user_id = $1', [user.id]);
+    let profile = profileResult.rows[0];
+    if (!profile) {
+      const insertProfile = await db.query(
+        'INSERT INTO profiles (user_id, display_name, role, phone, locale) VALUES ($1, $2, $3, $4, $5) RETURNING role',
+        [user.id, user.name, 'user', null, 'pt-BR']
+      );
+      profile = insertProfile.rows[0];
+    }
 
-    await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+    const tokens = buildTokens({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: profile.role,
+    });
+
+    await db.query('UPDATE users SET last_login = NOW(), last_login_at = NOW() WHERE id = $1', [
+      user.id,
+    ]);
 
     return res.json({
       id: user.id,
@@ -97,7 +148,7 @@ router.post('/login', async (req, res) => {
       access_token: tokens.accessToken,
       refresh_token: tokens.refreshToken,
       expires_in: 86400,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, role: profile.role },
       token: tokens.accessToken,
     });
   } catch (error) {
@@ -114,7 +165,12 @@ router.post('/refresh', async (req, res) => {
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-    const tokens = buildTokens({ id: decoded.id, email: decoded.email, name: decoded.name });
+    const tokens = buildTokens({
+      id: decoded.id,
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role,
+    });
 
     return res.json({
       access_token: tokens.accessToken,
@@ -144,12 +200,16 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
+    const profileResult = await db.query('SELECT role FROM profiles WHERE user_id = $1', [user.id]);
+    const role = profileResult.rows[0] ? profileResult.rows[0].role : decoded.role || 'user';
+
     return res.json({
       id: user.id,
       email: user.email,
       full_name: user.name,
       phone: user.phone,
       created_at: user.created_at,
+      role,
     });
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido' });
