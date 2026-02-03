@@ -1,5 +1,19 @@
 const contentService = require('../services/content.service');
 
+const withErrorHandling = (handler) => async (req, res) => {
+  try {
+    await handler(req, res);
+  } catch (error) {
+    console.error('Erro ao carregar conteúdo:', error);
+    res.status(500).json({ message: 'Conteúdo indisponível no momento.' });
+  }
+};
+
+const listServices = withErrorHandling((req, res) => {
+  res.json(contentService.getServices());
+});
+
+const getService = withErrorHandling((req, res) => {
 const listServices = (req, res) => {
   res.json(contentService.getServices());
 };
@@ -12,6 +26,21 @@ const getService = (req, res) => {
   }
 
   return res.json(service);
+});
+
+const getProfile = withErrorHandling((req, res) => {
+  res.json(contentService.getProfile());
+});
+
+const getFaq = withErrorHandling((req, res) => {
+  res.json(contentService.getFaq());
+});
+
+const listPosts = withErrorHandling((req, res) => {
+  res.json(contentService.getPosts());
+});
+
+const getPost = withErrorHandling((req, res) => {
 };
 
 const getProfile = (req, res) => {
@@ -34,6 +63,11 @@ const getPost = (req, res) => {
   }
 
   return res.json(post);
+});
+
+const getStats = withErrorHandling((req, res) => {
+  res.json(contentService.getStats());
+});
 };
 
 const getStats = (req, res) => {

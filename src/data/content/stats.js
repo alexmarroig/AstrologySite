@@ -1,13 +1,9 @@
 const content = require('../../../data/astrolumen_content_v1.json');
 
 const stats = content.stats;
-const stats = {
-  interpretacoes: 881,
-  mapas_gerados: 5000,
-  avaliacao_media: 4.9,
-  anos_experiencia: 10,
-  prazo_medio_entrega: '3–5 dias úteis'
-};
+const { getContent } = require('./content-store');
+
+const stats = getContent().stats || {};
 
 module.exports = {
   stats
