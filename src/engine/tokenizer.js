@@ -355,6 +355,10 @@ const tokenizePredictions = (transitResult = {}) => {
     }
   });
 
+  if (transitResult.window) {
+    tokens.add(`transit_window_${transitResult.window}`);
+  }
+
   return Array.from(tokens);
 };
 

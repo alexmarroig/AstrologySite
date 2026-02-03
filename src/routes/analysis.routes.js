@@ -103,6 +103,26 @@ const buildPreview = (service, tokens) => {
   };
 };
 
+const buildPreview = (service, tokens) => {
+  const contentVersion = contentStore.getMeta().content_version || 'v1';
+  const resolved = resolveSnippets({ tokens, service, contentVersion });
+  const preview = {};
+  Object.entries(resolved.sections || {}).forEach(([sectionId, snippets]) => {
+    preview[sectionId] = snippets.map((snippet) => ({
+      key: snippet.key,
+      title: snippet.title,
+      text_md: snippet.text_md,
+    }));
+  });
+
+  return {
+    content_version: contentVersion,
+    tokens,
+    resolved_preview: { sections: preview },
+    selected_keys: resolved.selected_keys,
+  };
+};
+
 router.post('/natal-chart', authMiddleware.authenticateToken, async (req, res) => {
   try {
     const payload = normalizeBirthPayload(req.body);
@@ -482,6 +502,10 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'predictions');
     if (cached) {
+      const transits = cached.ephemeris_data?.transits || [];
+      const window = cached.ephemeris_data?.transitWindow;
+      const tokens = tokenizePredictions({ transits, window });
+      const preview = buildPreview('predictions', tokens);
       const transits = (cached.ephemeris_data?.currentTransits || []).map((entry) => ({
         planet: entry.planet,
         target: 'sun',
@@ -515,22 +539,24 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
     }
 
     const today = new Date();
-    const currentChart = await ephemerisService.calculateNatalChart(
-      `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(
-        today.getUTCDate()
-      ).padStart(2, '0')}`,
-      '12:00',
-      locationPayload
+    const referenceDate = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(
+      2,
+      '0'
+    )}-${String(today.getUTCDate()).padStart(2, '0')}`;
+
+    const transitResult = await ephemerisService.calculateTransits(
+      payload.birthDate,
+      payload.birthTime,
+      locationPayload,
+      referenceDate
     );
 
-    const currentTransits = Object.entries(currentChart.planets).slice(0, 5).map(
-      ([planet, data]) => ({
-        planet,
-        sign: data.sign,
-        current_house: null,
-        influence: `${planet} em ${data.sign} traz foco em temas ligados ao signo.`,
-      })
-    );
+    const currentTransits = transitResult.transits.map((transit) => ({
+      planet: transit.planet,
+      sign: transitResult.transitChart.planets?.[transit.planet]?.sign,
+      current_house: transit.house,
+      influence: `${transit.planet} em ${transitResult.transitChart.planets?.[transit.planet]?.sign} destaca temas ativados.`,
+    }));
 
     const months = analysisPeriod === '3_months' ? 3 : analysisPeriod === '6_months' ? 6 : 12;
     const forecasts = Array.from({ length: months }, (_, index) => {
@@ -561,6 +587,11 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
 
     await analysisCacheService.storeCachedAnalysis(cacheHash, 'predictions', {
       ephemeris: {
+        transits: transitResult.transits,
+        transitWindow: `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(
+          2,
+          '0'
+        )}`,
         currentTransits,
         forecasts,
         criticalPeriods,
@@ -572,6 +603,10 @@ router.post('/predictions', authMiddleware.authenticateToken, async (req, res) =
     });
 
     const tokens = tokenizePredictions({
+      transits: transitResult.transits,
+      window: `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}`,
+    });
+    const preview = buildPreview('predictions', tokens);
       transits: currentTransits.map((entry) => ({
         planet: entry.planet,
         target: 'sun',
@@ -629,6 +664,10 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
 
     const cached = await analysisCacheService.getCachedAnalysis(cacheHash, 'progressions');
     if (cached) {
+      const tokens = tokenizeProgressions({
+        planets: cached.ephemeris_data?.progressedPlanets || {},
+        aspects: cached.ephemeris_data?.progressedAspects || [],
+      });
       const tokens = tokenizeProgressions({});
       const preview = buildPreview('progressions', tokens);
       return res.json({
@@ -647,6 +686,13 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
       });
     }
 
+    const progressions = await ephemerisService.calculateProgressions(
+      payload.birthDate,
+      payload.birthTime,
+      locationPayload,
+      analysisPeriod
+    );
+
     const highlights = [
       'Fase de amadurecimento emocional com foco em escolhas conscientes.',
       'Mudanças internas pedem atenção ao autocuidado e à rotina.',
@@ -662,6 +708,18 @@ router.post('/progressions', authMiddleware.authenticateToken, async (req, res) 
       ephemeris: {
         highlights,
         recommendations,
+        progressedPlanets: progressions.progressed.planets,
+        progressedAspects: progressions.aspects,
+      },
+      houses: progressions.progressed.houses,
+      aspects: progressions.aspects,
+      interpretations: [],
+    });
+
+    const tokens = tokenizeProgressions({
+      planets: progressions.progressed.planets,
+      aspects: progressions.aspects,
+    });
       },
       houses: {},
       aspects: [],

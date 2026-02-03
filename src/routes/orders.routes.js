@@ -6,6 +6,7 @@ const db = require('../db');
 const emailService = require('../services/email.service');
 const reportQueue = require('../queues/report.queue');
 const { getPricing } = require('../services/pricing.service');
+const { generateReportForOrder } = require('../reports/reportService');
 
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
@@ -357,6 +358,12 @@ router.post('/:orderId/complete', async (req, res) => {
       return res.status(400).json({ error: 'Pedido já completo' });
     }
 
+    let reportUrl = order.report_url;
+    if (!reportUrl) {
+      const generated = await generateReportForOrder(order);
+      reportUrl = generated.reportUrl;
+    }
+
     await db.query(
       `UPDATE orders
        SET status = $1, completed_at = NOW(), email_sent_to_client = true, email_sent_at_client = NOW()
@@ -365,7 +372,7 @@ router.post('/:orderId/complete', async (req, res) => {
     );
 
     const pricing = getPricing(order.service_type);
-    const reportUrl = order.report_url || 'Relatório em processamento.';
+    const reportLink = reportUrl || 'Relatório em processamento.';
 
     const dashboardUrl = `${process.env.FRONTEND_URL || ''}/dashboard`;
     await emailService.sendClientCompletionEmail({
@@ -373,7 +380,7 @@ router.post('/:orderId/complete', async (req, res) => {
       clientName: order.name,
       serviceLabel: serviceLabel(order.service_type),
       orderNumber: order.order_number,
-      reportUrl,
+      reportUrl: reportLink,
       dashboardUrl,
     });
 

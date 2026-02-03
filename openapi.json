@@ -392,6 +392,10 @@
     },
     "/api/analysis/progressions": {
       "post": {
+        "summary": "Análise progressions",
+        "responses": {
+          "200": {
+            "description": "Resposta de análise",
         "summary": "Gera análise de progressões secundárias",
     "/api/admin/content/import": {
       "post": {
@@ -664,6 +668,74 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReportGenerationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/natal-chart": {
+      "post": {
+        "summary": "Análise natal-chart",
+        "responses": {
+          "200": {
+            "description": "Resposta de análise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NatalAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/solar-return": {
+      "post": {
+        "summary": "Análise solar-return",
+        "responses": {
+          "200": {
+            "description": "Resposta de análise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolarReturnAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/synastry": {
+      "post": {
+        "summary": "Análise synastry",
+        "responses": {
+          "200": {
+            "description": "Resposta de análise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SynastryAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/analysis/predictions": {
+      "post": {
+        "summary": "Análise predictions",
+        "responses": {
+          "200": {
+            "description": "Resposta de análise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionsAnalysisResponse"
                   "$ref": "#/components/schemas/AdminReportGenerateResponse"
                 }
               }
@@ -2388,9 +2460,80 @@
             "items": {
               "$ref": "#/components/schemas/HoroscopeDaily"
             }
+          },
+          "tipo_entrega": {
+            "type": "string"
           }
         }
       },
+      "Contato": {
+        "type": "object",
+        "properties": {
+          "telefone": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          }
+        }
+      },
+      "RedesSociais": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string"
+          },
+          "youtube": {
+            "type": "string"
+          },
+          "tiktok": {
+            "type": "string"
+          }
+        }
+      },
+      "FAQItem": {
+        "type": "object",
+        "properties": {
+          "pergunta": {
+            "type": "string"
+          },
+          "resposta": {
+            "type": "string"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "biografia": {
+            "type": "string"
+          },
+          "citacao": {
+            "type": "string"
+          },
+          "contato": {
+            "$ref": "#/components/schemas/Contato"
+          },
+          "redes_sociais": {
+            "$ref": "#/components/schemas/RedesSociais"
       "VersionedContentFull": {
         "type": "object",
         "properties": {
@@ -2424,6 +2567,14 @@
           "faq": {
             "type": "array",
             "items": {
+              "$ref": "#/components/schemas/FAQItem"
+            }
+          }
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
               "$ref": "#/components/schemas/ContentServiceFaqItem"
             }
           },
@@ -2584,12 +2735,23 @@
           "resumo": {
             "type": "string"
           },
+          "imagem": {
+            "type": "string"
+          },
           "autor": {
             "type": "string"
           },
           "data_publicacao": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PostSummary"
           },
           "imagem": {
             "type": "string"
@@ -2607,6 +2769,12 @@
             "properties": {
               "conteudo": {
                 "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -2657,8 +2825,58 @@
               }
             }
           }
+        ]
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes_realizadas": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "satisfacao_media": {
+            "type": "number"
+          },
+          "avaliacoes": {
+            "type": "integer"
+          }
         }
       },
+      "ContentServiceFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentService": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "preco": {
+            "type": "number"
+          },
+          "prazo_entrega": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "para_quem_e": {
       "SelectedKeys": {
         "type": "object",
         "properties": {
@@ -2668,6 +2886,13 @@
               "type": "string"
             }
           },
+          "inclui": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_funciona": {
           "sections": {
             "type": "object",
             "additionalProperties": {
@@ -2691,6 +2916,7 @@
               "type": "string"
             }
           },
+          "beneficios": {
           "sections": {
             "type": "object",
             "additionalProperties": {
@@ -2719,6 +2945,20 @@
             "items": {
               "type": "string"
             }
+          },
+          "faq": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentServiceFaqItem"
+            }
+          },
+          "cta_label": {
+            "type": "string"
+          },
+          "imagem": {
+            "type": "string"
+          },
+          "tags": {
           }
         }
       },
@@ -2787,6 +3027,71 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ContentProfileQuote": {
+        "type": "object",
+        "properties": {
+          "autor": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfileContact": {
+        "type": "object",
+        "properties": {
+          "whatsapp": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "instagram": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentProfile": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string"
+          },
+          "formacao": {
+            "type": "string"
+          },
+          "inicio_estudos": {
+            "type": "integer"
+          },
+          "experiencia": {
+            "type": "string"
+          },
+          "abordagem": {
+            "type": "string"
+          },
+          "biografia_curta": {
+            "type": "string"
+          },
+          "biografia_longa": {
+            "type": "string"
+          },
+          "missao": {
+            "type": "string"
+          },
+          "citacao": {
+            "$ref": "#/components/schemas/ContentProfileQuote"
+          },
+          "especialidades": {
           },
           "recommendations": {
           "tags": {
@@ -2827,12 +3132,85 @@
               "type": "string"
             }
           },
+          "beneficios": {
           "sections": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
+          "contato": {
+            "$ref": "#/components/schemas/ContentProfileContact"
+          }
+        }
+      },
+      "ContentFaqItem": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          },
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "resumo": {
+            "type": "string"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "data_publicacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "imagem": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentPost": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContentPostSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "conteudo": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ContentStats": {
+        "type": "object",
+        "properties": {
+          "interpretacoes": {
+            "type": "integer"
+          },
+          "mapas_gerados": {
+            "type": "integer"
+          },
+          "avaliacao_media": {
+            "type": "number"
+          },
+          "anos_experiencia": {
+            "type": "integer"
+          },
+          "prazo_medio_entrega": {
           "tags": {
             "type": "array",
             "items": {
@@ -2883,6 +3261,18 @@
           }
         }
       },
+      "HoroscopeDaily": {
+        "type": "object",
+        "properties": {
+          "sign": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
       "AdminReportGenerateResponse": {
         "type": "object",
         "properties": {
@@ -2932,6 +3322,118 @@
         }
       },
       "ProgressionsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AnalysisPreviewFields"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "Snippet": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "service_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "object"
+          }
+        }
+      },
+      "ResolvedPreview": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SnippetPreview"
+              }
+            }
+          }
+        }
+      },
+      "ReportGenerationResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string"
+          }
+        }
+      },
+      "AnalysisPreviewFields": {
+        "type": "object",
+        "properties": {
+          "content_version": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resolved_preview": {
+            "$ref": "#/components/schemas/ResolvedPreview"
+          },
+          "selected_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SnippetPreview": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "text_md": {
+            "type": "string"
         "type": "object",
         "properties": {
           "analysis_id": {
@@ -2965,6 +3467,46 @@
             "type": "object"
           }
         }
+      },
+      "NatalAnalysisResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AnalysisPreviewFields"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "SolarReturnAnalysisResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AnalysisPreviewFields"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "SynastryAnalysisResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AnalysisPreviewFields"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "PredictionsAnalysisResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AnalysisPreviewFields"
+          },
+          {
+            "type": "object"
+          }
+        ]
       }
     }
   }

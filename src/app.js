@@ -41,6 +41,18 @@ app.get('/openapi.json', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'openapi.json'));
 });
 
+app.use('/', require('./routes/content.routes'));
+app.use('/api/content', require('./routes/content-api.routes'));
+app.use('/api/horoscope', require('./routes/horoscope.routes'));
+app.use('/api/admin', require('./routes/admin/content.routes'));
+app.use('/api/admin', require('./routes/admin/reports.routes'));
+
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+app.get('/openapi.json', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'openapi.json'));
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend rodando' });
 });

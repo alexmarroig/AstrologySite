@@ -157,6 +157,31 @@ const buildInterChartAspects = (planets1, planets2) => {
   return aspects.sort((a, b) => a.orb - b.orb);
 };
 
+const normalizeDegrees = (longitude) => ((longitude % 360) + 360) % 360;
+
+const getHouseFromLongitude = (longitude, houses) => {
+  if (!houses) return null;
+  const cusps = Array.from({ length: 12 }, (_, index) => {
+    const houseKey = `house${index + 1}`;
+    return houses[houseKey]?.longitude;
+  });
+  if (cusps.some((cusp) => typeof cusp !== 'number')) return null;
+
+  const normalized = normalizeDegrees(longitude);
+  for (let i = 0; i < cusps.length; i += 1) {
+    const start = normalizeDegrees(cusps[i]);
+    const end = normalizeDegrees(cusps[(i + 1) % cusps.length]);
+    if (start <= end) {
+      if (normalized >= start && normalized < end) {
+        return i + 1;
+      }
+    } else if (normalized >= start || normalized < end) {
+      return i + 1;
+    }
+  }
+  return null;
+};
+
 class EphemerisService {
   async calculateNatalChart(birthDate, birthTime, birthLocation) {
     const location = parseLocation(birthLocation);
@@ -187,6 +212,12 @@ class EphemerisService {
         };
       }
     }
+
+    Object.values(planets).forEach((planet) => {
+      if (houseData?.cusps) {
+        planet.house = getHouseFromLongitude(planet.longitude, houses);
+      }
+    });
 
     const aspects = buildAspects(planets);
 
@@ -233,6 +264,57 @@ class EphemerisService {
       chart1,
       chart2,
       interAspects,
+    };
+  }
+
+  async calculateProgressions(birthDate, birthTime, birthLocation, analysisPeriod) {
+    const [year] = birthDate.split('-').map(Number);
+    const match = String(analysisPeriod || '').match(/(\d{4})/g);
+    const targetYear = match && match.length > 1 ? Number(match[1]) : Number(match?.[0]);
+    const yearsDiff = Number.isFinite(targetYear) ? targetYear - year : 0;
+    const baseDate = new Date(`${birthDate}T00:00:00Z`);
+    baseDate.setUTCDate(baseDate.getUTCDate() + yearsDiff);
+    const progressedDate = baseDate.toISOString().split('T')[0];
+
+    const natal = await this.calculateNatalChart(birthDate, birthTime, birthLocation);
+    const progressed = await this.calculateNatalChart(progressedDate, birthTime, birthLocation);
+    const aspects = buildInterChartAspects(progressed.planets, natal.planets);
+
+    return {
+      natal,
+      progressed,
+      aspects,
+    };
+  }
+
+  async calculateTransits(birthDate, birthTime, birthLocation, referenceDate) {
+    const natal = await this.calculateNatalChart(birthDate, birthTime, birthLocation);
+    const transitChart = await this.calculateNatalChart(
+      referenceDate,
+      birthTime || '12:00',
+      birthLocation
+    );
+
+    const slowPlanets = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+    const aspects = buildInterChartAspects(transitChart.planets, natal.planets).filter(
+      (aspect) => slowPlanets.includes(aspect.planet1)
+    );
+
+    const transits = aspects.map((aspect) => ({
+      planet: aspect.planet1,
+      target: aspect.planet2,
+      aspect: aspect.type,
+      orb: aspect.orb,
+      house: getHouseFromLongitude(
+        transitChart.planets[aspect.planet1]?.longitude,
+        transitChart.houses
+      ),
+    }));
+
+    return {
+      natal,
+      transitChart,
+      transits,
     };
   }
 }

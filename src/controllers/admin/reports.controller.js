@@ -1,3 +1,5 @@
+const db = require('../../db');
+const { generateReportForOrder } = require('../../reports/reportService');
 const path = require('path');
 const fs = require('fs');
 const db = require('../../db');
@@ -49,6 +51,9 @@ const generateReport = async (req, res) => {
       return res.status(404).json({ error: 'Pedido não encontrado' });
     }
 
+    const { reportUrl, filePath } = await generateReportForOrder(order);
+
+    return res.json({ orderId, report_url: reportUrl, file_path: filePath });
     const serviceType = mapServiceType(order.service_type);
     const serviceData = typeof order.service_data === 'string'
       ? JSON.parse(order.service_data)
