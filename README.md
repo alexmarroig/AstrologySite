@@ -1,5 +1,21 @@
 # AstroLumen API
 
+## Node/Express (atual)
+
+Este repositório contém um backend Node/Express para o AstroLumen, com conteúdo versionado em JSON e geração programática de relatórios DOCX.
+
+### Testes
+
+```bash
+npm test
+```
+
+O comando usa o runner nativo do Node (`node --test`) para evitar dependências externas. Se o registry interno bloquear downloads (erro 403), configure o registry padrão:
+
+```bash
+npm config set registry https://registry.npmjs.org/
+```
+
 Backend em FastAPI para cálculo de mapa natal usando Swiss Ephemeris (pyswisseph).
 
 ## Stack
