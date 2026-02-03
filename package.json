@@ -23,7 +23,7 @@
     "openai": "^4.58.0",
     "pg": "^8.12.0",
     "stripe": "^15.12.0",
-    "swisseph": "^2.10.3"
+    "swisseph": "0.5.17"
   },
   "devDependencies": {
     "jest": "^29.7.0",

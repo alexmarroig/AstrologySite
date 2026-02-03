@@ -16,6 +16,9 @@ COPY app ./app
 COPY openapi.json ./openapi.json
 COPY README.md ./README.md
 
+# Ensure we have a place for local data if needed, though we moved to Postgres
+RUN mkdir -p /app/data
+
 EXPOSE 8000
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

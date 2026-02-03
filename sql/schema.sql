@@ -4,11 +4,12 @@ CREATE TABLE IF NOT EXISTS planet_sign_interpretations (
   id SERIAL PRIMARY KEY,
   planet VARCHAR(20) NOT NULL,
   sign VARCHAR(20) NOT NULL,
+  language VARCHAR(10) NOT NULL DEFAULT 'pt-BR',
   interpretation TEXT NOT NULL,
   keywords VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(planet, sign)
+  UNIQUE(planet, sign, language)
 );
 
 CREATE TABLE IF NOT EXISTS aspect_interpretations (
@@ -16,23 +17,37 @@ CREATE TABLE IF NOT EXISTS aspect_interpretations (
   planet1 VARCHAR(20) NOT NULL,
   planet2 VARCHAR(20) NOT NULL,
   aspect_type VARCHAR(20) NOT NULL,
+  language VARCHAR(10) NOT NULL DEFAULT 'pt-BR',
   interpretation TEXT NOT NULL,
   quality VARCHAR(20),
   keywords VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(planet1, planet2, aspect_type)
+  UNIQUE(planet1, planet2, aspect_type, language)
 );
 
 CREATE TABLE IF NOT EXISTS house_sign_interpretations (
   id SERIAL PRIMARY KEY,
   house_number INT NOT NULL,
   sign VARCHAR(20) NOT NULL,
+  language VARCHAR(10) NOT NULL DEFAULT 'pt-BR',
   interpretation TEXT NOT NULL,
   keywords VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(house_number, sign)
+  UNIQUE(house_number, sign, language)
+);
+
+CREATE TABLE IF NOT EXISTS planet_house_interpretations (
+  id SERIAL PRIMARY KEY,
+  planet VARCHAR(20) NOT NULL,
+  house_number INT NOT NULL,
+  language VARCHAR(10) NOT NULL DEFAULT 'pt-BR',
+  interpretation TEXT NOT NULL,
+  keywords VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(planet, house_number, language)
 );
 
 -- ===== TABELAS DO SISTEMA =====
@@ -120,9 +135,10 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
 
 -- ===== ÍNDICES PARA PERFORMANCE =====
 
-CREATE INDEX IF NOT EXISTS idx_planet_sign ON planet_sign_interpretations(planet, sign);
-CREATE INDEX IF NOT EXISTS idx_aspect ON aspect_interpretations(planet1, planet2, aspect_type);
-CREATE INDEX IF NOT EXISTS idx_house_sign ON house_sign_interpretations(house_number, sign);
+CREATE INDEX IF NOT EXISTS idx_planet_sign ON planet_sign_interpretations(planet, sign, language);
+CREATE INDEX IF NOT EXISTS idx_aspect ON aspect_interpretations(planet1, planet2, aspect_type, language);
+CREATE INDEX IF NOT EXISTS idx_house_sign ON house_sign_interpretations(house_number, sign, language);
+CREATE INDEX IF NOT EXISTS idx_planet_house ON planet_house_interpretations(planet, house_number, language);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_analyses_user_id ON analyses(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);

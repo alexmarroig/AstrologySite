@@ -1,47 +1,36 @@
 from __future__ import annotations
 
-import sqlite3
-from pathlib import Path
-from typing import Iterable
+import logging
+from typing import Any, Iterable
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
 
-def _get_connection() -> sqlite3.Connection:
-    db_path = Path(settings.interpretations_db_path)
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(db_path)
-    connection.row_factory = sqlite3.Row
-    return connection
+
+def _get_connection():
+    try:
+        connection = psycopg2.connect(settings.database_url, cursor_factory=RealDictCursor)
+        return connection
+    except Exception:
+        logger.exception("Failed to connect to PostgreSQL")
+        return None
 
 
 def init_interpretations_store() -> None:
-    with _get_connection() as connection:
-        connection.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS interpretations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                kind TEXT NOT NULL,
-                planet TEXT,
-                sign TEXT,
-                house INTEGER,
-                aspect TEXT,
-                other_planet TEXT,
-                language TEXT NOT NULL,
-                text TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_interpretations_kind_planet_sign
-                ON interpretations(kind, planet, sign);
-            CREATE INDEX IF NOT EXISTS idx_interpretations_kind_planet_other_aspect
-                ON interpretations(kind, planet, other_planet, aspect);
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_interpretations_unique
-                ON interpretations(kind, planet, sign, house, aspect, other_planet, language);
-            """
-        )
-        _seed_interpretations(connection)
+    """PostgreSQL tables are initialized via sql/schema.sql or migrations."""
+    connection = _get_connection()
+    if connection:
+        try:
+            _seed_interpretations(connection)
+        finally:
+            connection.close()
 
 
-def _seed_interpretations(connection: sqlite3.Connection) -> None:
+def _seed_interpretations(connection) -> None:
     samples: Iterable[dict[str, object]] = [
         {
             "kind": "aspect",
@@ -88,22 +77,30 @@ def _seed_interpretations(connection: sqlite3.Connection) -> None:
             "text": "Venus in Libra favors harmony, beauty, and diplomacy in bonds.",
         },
     ]
-    columns = (
-        "kind",
-        "planet",
-        "sign",
-        "house",
-        "aspect",
-        "other_planet",
-        "language",
-        "text",
-    )
-    placeholders = ", ".join(f":{column}" for column in columns)
-    statement = (
-        f"INSERT OR IGNORE INTO interpretations ({', '.join(columns)}) "
-        f"VALUES ({placeholders})"
-    )
-    connection.executemany(statement, samples)
+    for sample in samples:
+        kind = sample["kind"]
+        if kind == "aspect":
+            query = """
+                INSERT INTO aspect_interpretations (planet1, planet2, aspect_type, language, interpretation)
+                VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING
+            """
+            params = (sample["planet"], sample["other_planet"], sample["aspect"], sample["language"], sample["text"])
+        elif kind == "planet_house":
+            query = """
+                INSERT INTO planet_house_interpretations (planet, house_number, language, interpretation)
+                VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING
+            """
+            params = (sample["planet"], sample["house"], sample["language"], sample["text"])
+        elif kind == "planet_sign":
+            query = """
+                INSERT INTO planet_sign_interpretations (planet, sign, language, interpretation)
+                VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING
+            """
+            params = (sample["planet"], sample["sign"], sample["language"], sample["text"])
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+    connection.commit()
 
 
 def get_interpretation(
@@ -116,36 +113,61 @@ def get_interpretation(
     other_planet: str | None = None,
     language: str = "pt-BR",
 ) -> str | None:
-    filters = [
-        ("planet", planet),
-        ("sign", sign),
-        ("house", house),
-        ("aspect", aspect),
-        ("other_planet", other_planet),
-    ]
-    base_query = "SELECT text FROM interpretations WHERE kind = ? AND language = ?"
+    table_map = {
+        "planet_sign": ("planet_sign_interpretations", ["planet", "sign"]),
+        "planet_house": ("planet_house_interpretations", ["planet", "house_number"]),
+        "aspect": ("aspect_interpretations", ["planet1", "planet2", "aspect_type"]),
+    }
 
-    def build_query() -> tuple[str, list[object]]:
-        conditions = []
-        params: list[object] = [kind, language]
-        for column, value in filters:
-            if value is None:
-                conditions.append(f"{column} IS NULL")
-            else:
-                conditions.append(f"{column} = ?")
-                params.append(value)
-        query = f"{base_query} AND {' AND '.join(conditions)}"
-        return query, params
+    if kind not in table_map:
+        return None
 
-    with _get_connection() as connection:
-        query, params = build_query()
-        row = connection.execute(query, params).fetchone()
-        if row:
-            return str(row["text"])
-        if language != "pt-BR":
-            fallback_params = params[:]
-            fallback_params[1] = "pt-BR"
-            row = connection.execute(query, fallback_params).fetchone()
+    table_name, columns = table_map[kind]
+
+    # Map input args to table columns
+    arg_map = {
+        "planet": planet,
+        "sign": sign,
+        "house_number": house,
+        "planet1": planet,
+        "planet2": other_planet,
+        "aspect_type": aspect,
+    }
+
+    conditions = ["language = %s"]
+    params = [language]
+
+    for col in columns:
+        val = arg_map.get(col)
+        if val is None:
+            conditions.append(f"{col} IS NULL")
+        else:
+            conditions.append(f"{col} = %s")
+            params.append(val)
+
+    query = f"SELECT interpretation FROM {table_name} WHERE {' AND '.join(conditions)} LIMIT 1"
+
+    connection = _get_connection()
+    if not connection:
+        return None
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            row = cursor.fetchone()
             if row:
-                return str(row["text"])
+                return str(row["interpretation"])
+
+            # Fallback to pt-BR if not found
+            if language != "pt-BR":
+                params[0] = "pt-BR"
+                cursor.execute(query, params)
+                row = cursor.fetchone()
+                if row:
+                    return str(row["interpretation"])
+    except Exception:
+        logger.exception("Error fetching interpretation from PostgreSQL")
+    finally:
+        connection.close()
+
     return None

@@ -101,8 +101,8 @@ async function seed() {
     console.log(`📊 Gerando ${planetSignData.length} interpretações Planeta-Signo...`);
     for (const item of planetSignData) {
       await db.query(
-        'INSERT INTO planet_sign_interpretations (planet, sign, interpretation, keywords) VALUES ($1, $2, $3, $4) ON CONFLICT (planet, sign) DO NOTHING',
-        [item.planet, item.sign, item.interpretation, item.keywords]
+        'INSERT INTO planet_sign_interpretations (planet, sign, language, interpretation, keywords) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (planet, sign, language) DO NOTHING',
+        [item.planet, item.sign, 'pt-BR', item.interpretation, item.keywords]
       );
     }
     console.log('✅ Planeta-Signo inseridos!\n');
@@ -110,8 +110,8 @@ async function seed() {
     console.log(`📊 Gerando ${aspectData.length} interpretações de Aspectos...`);
     for (const item of aspectData) {
       await db.query(
-        'INSERT INTO aspect_interpretations (planet1, planet2, aspect_type, interpretation, quality, keywords) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (planet1, planet2, aspect_type) DO NOTHING',
-        [item.planet1, item.planet2, item.aspect_type, item.interpretation, item.quality, item.keywords]
+        'INSERT INTO aspect_interpretations (planet1, planet2, aspect_type, language, interpretation, quality, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (planet1, planet2, aspect_type, language) DO NOTHING',
+        [item.planet1, item.planet2, item.aspect_type, 'pt-BR', item.interpretation, item.quality, item.keywords]
       );
     }
     console.log('✅ Aspectos inseridos!\n');
@@ -119,8 +119,8 @@ async function seed() {
     console.log(`📊 Gerando ${houseData.length} interpretações Casas-Signos...`);
     for (const item of houseData) {
       await db.query(
-        'INSERT INTO house_sign_interpretations (house_number, sign, interpretation, keywords) VALUES ($1, $2, $3, $4) ON CONFLICT (house_number, sign) DO NOTHING',
-        [item.house_number, item.sign, item.interpretation, item.keywords]
+        'INSERT INTO house_sign_interpretations (house_number, sign, language, interpretation, keywords) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (house_number, sign, language) DO NOTHING',
+        [item.house_number, item.sign, 'pt-BR', item.interpretation, item.keywords]
       );
     }
     console.log('✅ Casas-Signos inseridos!\n');

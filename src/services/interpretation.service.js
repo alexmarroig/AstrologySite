@@ -1,26 +1,34 @@
 const db = require('../db');
 
 class InterpretationService {
-  async getPlanetSignInterpretation(planet, sign) {
+  async getPlanetSignInterpretation(planet, sign, language = 'pt-BR') {
     const result = await db.query(
-      'SELECT interpretation, keywords FROM planet_sign_interpretations WHERE LOWER(planet) = LOWER($1) AND LOWER(sign) = LOWER($2)',
-      [planet, sign]
+      'SELECT interpretation, keywords FROM planet_sign_interpretations WHERE LOWER(planet) = LOWER($1) AND LOWER(sign) = LOWER($2) AND language = $3',
+      [planet, sign, language]
     );
     return result.rows[0] || null;
   }
 
-  async getAspectInterpretation(planet1, planet2, aspectType) {
+  async getAspectInterpretation(planet1, planet2, aspectType, language = 'pt-BR') {
     const result = await db.query(
-      'SELECT interpretation, quality FROM aspect_interpretations WHERE LOWER(planet1) = LOWER($1) AND LOWER(planet2) = LOWER($2) AND LOWER(aspect_type) = LOWER($3)',
-      [planet1, planet2, aspectType]
+      'SELECT interpretation, quality FROM aspect_interpretations WHERE LOWER(planet1) = LOWER($1) AND LOWER(planet2) = LOWER($2) AND LOWER(aspect_type) = LOWER($3) AND language = $4',
+      [planet1, planet2, aspectType, language]
     );
     return result.rows[0] || null;
   }
 
-  async getHouseInterpretation(houseNumber, sign) {
+  async getHouseInterpretation(houseNumber, sign, language = 'pt-BR') {
     const result = await db.query(
-      'SELECT interpretation, keywords FROM house_sign_interpretations WHERE house_number = $1 AND LOWER(sign) = LOWER($2)',
-      [houseNumber, sign]
+      'SELECT interpretation, keywords FROM house_sign_interpretations WHERE house_number = $1 AND LOWER(sign) = LOWER($2) AND language = $3',
+      [houseNumber, sign, language]
+    );
+    return result.rows[0] || null;
+  }
+
+  async getPlanetHouseInterpretation(planet, houseNumber, language = 'pt-BR') {
+    const result = await db.query(
+      'SELECT interpretation, keywords FROM planet_house_interpretations WHERE LOWER(planet) = LOWER($1) AND house_number = $2 AND language = $3',
+      [planet, houseNumber, language]
     );
     return result.rows[0] || null;
   }

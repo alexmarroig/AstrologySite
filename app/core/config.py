@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     geocode_user_agent: str = "astrolumen-api"
     cors_origins: list[str] = ["http://localhost:5173"]
+    database_url: str = "postgresql://postgres:postgres@localhost:5432/astrolumen"
     interpretations_db_path: str = "interpretations.db"
     ai_fallback_enabled: bool = True
 
