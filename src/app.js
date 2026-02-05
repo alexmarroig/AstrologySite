@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { initializeContentStore } = require('./content/contentStore');
+const { userActivityTracker } = require('./middleware/user-activity.middleware');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +12,7 @@ initializeContentStore();
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use('/v1/payments/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+app.use(userActivityTracker);
 
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/analysis', require('./routes/analysis.routes'));
