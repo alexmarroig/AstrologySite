@@ -3,6 +3,7 @@ const db = require('../../db');
 const { optionalAuth, authenticate, requireAdmin } = require('../../middleware/auth');
 const { rateLimit } = require('../../middleware/rate-limit');
 const { hashIp, sanitizeProps, detectDevice } = require('../../utils/analytics');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -95,19 +96,22 @@ router.post(
 
       await db.query(
         `INSERT INTO analytics_events
-        (session_id, user_id, event_name, page, ts, props_json, referrer, duration_ms)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        (id, created_at, event_name, user_id, anonymous_id, session_id, page_url, referrer, payload_json, utm_json, ip_hash, user_agent, consent_analytics)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
-          sessionId,
-          req.user ? req.user.id : null,
-          event,
-          page || null,
+          crypto.randomUUID(),
           eventTs,
-          sanitizedProps,
+          event,
+          req.user ? req.user.id : null,
+          sessionId,
+          sessionId,
+          page || null,
           referrer || null,
-          sanitizedProps && Number.isFinite(sanitizedProps.duration_ms)
-            ? sanitizedProps.duration_ms
-            : null,
+          sanitizedProps,
+          utmData || null,
+          ipHash,
+          userAgent,
+          Boolean(consentAnalytics),
         ]
       );
 
@@ -139,11 +143,11 @@ router.get('/summary', authenticate, requireAdmin(), async (req, res) => {
       [start, end]
     );
     const uniqueUsersResult = await db.query(
-      'SELECT COUNT(DISTINCT user_id) AS count FROM analytics_events WHERE ts BETWEEN $1 AND $2 AND user_id IS NOT NULL',
+      'SELECT COUNT(DISTINCT user_id) AS count FROM analytics_events WHERE created_at BETWEEN $1 AND $2 AND user_id IS NOT NULL',
       [start, end]
     );
     const leadsResult = await db.query(
-      "SELECT COUNT(*) AS count FROM analytics_events WHERE event_name = 'form_submit' AND ts BETWEEN $1 AND $2",
+      "SELECT COUNT(*) AS count FROM analytics_events WHERE event_name = 'form_submit' AND created_at BETWEEN $1 AND $2",
       [start, end]
     );
     const ordersCreatedResult = await db.query(
@@ -156,10 +160,10 @@ router.get('/summary', authenticate, requireAdmin(), async (req, res) => {
     );
 
     const topPagesResult = await db.query(
-      `SELECT page, COUNT(*) AS views, AVG(duration_ms) AS avg_time
+      `SELECT page_url AS page, COUNT(*) AS views
        FROM analytics_events
-       WHERE event_name = 'page_view' AND ts BETWEEN $1 AND $2
-       GROUP BY page
+       WHERE event_name = 'page_view' AND created_at BETWEEN $1 AND $2
+       GROUP BY page_url
        ORDER BY views DESC
        LIMIT 10`,
       [start, end]
@@ -174,8 +178,8 @@ router.get('/summary', authenticate, requireAdmin(), async (req, res) => {
         `SELECT COUNT(DISTINCT session_id) AS count
          FROM analytics_events
          WHERE event_name = $1
-           AND ts BETWEEN $2 AND $3
-           AND ($4::text IS NULL OR page = $4)`,
+           AND created_at BETWEEN $2 AND $3
+           AND ($4::text IS NULL OR page_url = $4)`,
         [eventName, start, end, pageFilter]
       );
       funnel[stage] = Number(result.rows[0].count || 0);
@@ -191,7 +195,6 @@ router.get('/summary', authenticate, requireAdmin(), async (req, res) => {
       top_pages: topPagesResult.rows.map((row) => ({
         page: row.page,
         views: Number(row.views || 0),
-        avg_time: row.avg_time ? Number(row.avg_time) : 0,
       })),
       funnel,
     });
@@ -209,10 +212,10 @@ router.get('/user/:userId/timeline', authenticate, requireAdmin(), async (req, r
     const offset = (page - 1) * pageSize;
 
     const eventsResult = await db.query(
-      `SELECT id, event_name, page, ts, props_json, referrer
+      `SELECT id, event_name, page_url, created_at, payload_json, referrer
        FROM analytics_events
        WHERE user_id = $1
-       ORDER BY ts DESC
+       ORDER BY created_at DESC
        LIMIT $2 OFFSET $3`,
       [userId, pageSize, offset]
     );

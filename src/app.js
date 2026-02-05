@@ -27,9 +27,11 @@ app.use('/api/admin', require('./routes/admin/content.routes'));
 app.use('/api/admin', require('./routes/admin/reports.routes'));
 
 app.use('/v1/analytics', require('./routes/v1/analytics.routes'));
+app.use('/v1', require('./routes/v1/tracking.routes'));
 app.use('/v1/services', require('./routes/v1/services.routes'));
 app.use('/v1/orders', require('./routes/v1/orders.routes'));
 app.use('/v1/payments', require('./routes/v1/payments.routes'));
+app.use('/v1/auth', require('./routes/v1/auth.routes'));
 app.use('/v1/admin', require('./routes/v1/admin.routes'));
 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
