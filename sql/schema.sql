@@ -41,14 +41,33 @@ CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255) NOT NULL,
+  role VARCHAR(20) DEFAULT 'user',
   password_hash VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   last_login TIMESTAMP,
   last_login_at TIMESTAMP,
   is_active BOOLEAN DEFAULT true,
   is_verified BOOLEAN DEFAULT false,
+  consent_necessary BOOLEAN DEFAULT true,
+  consent_analytics BOOLEAN DEFAULT false,
+  consent_marketing BOOLEAN DEFAULT false,
+  consent_updated_at TIMESTAMP,
+  utm_first_touch_json JSONB,
+  utm_last_touch_json JSONB,
+  last_seen_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS leads (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255),
+  whatsapp VARCHAR(30),
+  name VARCHAR(255),
+  anonymous_id VARCHAR(100) NOT NULL UNIQUE,
+  utm_first_touch_json JSONB,
+  utm_last_touch_json JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS profiles (
@@ -76,14 +95,19 @@ CREATE TABLE IF NOT EXISTS services (
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  lead_id INTEGER REFERENCES leads(id) ON DELETE SET NULL,
   service_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
+  service_slug VARCHAR(50),
   order_number VARCHAR(50) UNIQUE,
   service_type VARCHAR(50),
-  status VARCHAR(50) DEFAULT 'draft',
+  status VARCHAR(50) DEFAULT 'requested',
   service_data JSONB,
   amount NUMERIC(10, 2),
   currency VARCHAR(3) DEFAULT 'BRL',
+  price NUMERIC(10, 2),
   amount_cents INTEGER,
+  payment_provider VARCHAR(100),
+  payment_id VARCHAR(255),
   session_id VARCHAR(100),
   referrer TEXT,
   landing_page TEXT,
@@ -148,16 +172,30 @@ CREATE TABLE IF NOT EXISTS analytics_sessions (
 );
 
 CREATE TABLE IF NOT EXISTS analytics_events (
-  id SERIAL PRIMARY KEY,
-  session_id VARCHAR(100) REFERENCES analytics_sessions(session_id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  event_name TEXT NOT NULL,
   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-  event_name VARCHAR(100) NOT NULL,
-  page TEXT,
-  ts TIMESTAMP NOT NULL,
-  props_json JSONB,
+  lead_id INTEGER REFERENCES leads(id) ON DELETE SET NULL,
+  anonymous_id VARCHAR(100),
+  session_id VARCHAR(100),
+  page_url TEXT,
   referrer TEXT,
-  duration_ms INTEGER
+  service_slug VARCHAR(50),
+  payload_json JSONB,
+  utm_json JSONB,
+  ip_hash VARCHAR(255),
+  user_agent TEXT,
+  consent_analytics BOOLEAN DEFAULT true
 );
+
+CREATE INDEX IF NOT EXISTS analytics_events_created_at_idx ON analytics_events(created_at);
+CREATE INDEX IF NOT EXISTS analytics_events_event_name_idx ON analytics_events(event_name);
+CREATE INDEX IF NOT EXISTS analytics_events_user_id_idx ON analytics_events(user_id);
+CREATE INDEX IF NOT EXISTS analytics_events_anonymous_id_idx ON analytics_events(anonymous_id);
+CREATE INDEX IF NOT EXISTS analytics_events_service_slug_idx ON analytics_events(service_slug);
+
+CREATE INDEX IF NOT EXISTS leads_anonymous_id_idx ON leads(anonymous_id);
 
 CREATE TABLE IF NOT EXISTS audit_logs (
   id SERIAL PRIMARY KEY,

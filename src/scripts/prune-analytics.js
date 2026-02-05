@@ -5,7 +5,7 @@ const retentionDays = Number(process.env.ANALYTICS_RETENTION_DAYS || 90);
 const prune = async () => {
   try {
     const result = await db.query(
-      'DELETE FROM analytics_events WHERE ts < NOW() - ($1::text || \' days\')::interval',
+      'DELETE FROM analytics_events WHERE created_at < NOW() - ($1::text || \' days\')::interval',
       [retentionDays]
     );
     await db.query(

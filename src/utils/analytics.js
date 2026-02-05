@@ -5,7 +5,9 @@ const SENSITIVE_KEYS = ['password', 'token', 'auth', 'email', 'phone', 'cpf', 'c
 
 const hashIp = (ip) => {
   const salt = process.env.IP_HASH_SALT || 'astrolumen';
-  return crypto.createHash('sha256').update(`${ip}-${salt}`).digest('hex');
+  const version = process.env.IP_HASH_SALT_VERSION || 'v1';
+  const digest = crypto.createHash('sha256').update(`${ip}-${salt}`).digest('hex');
+  return `${version}:${digest}`;
 };
 
 const sanitizeProps = (props = {}) => {

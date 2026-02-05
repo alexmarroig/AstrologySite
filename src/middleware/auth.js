@@ -8,7 +8,7 @@ const getToken = (req) => {
 
 const loadUserProfile = async (userId) => {
   const result = await db.query(
-    `SELECT users.id, users.email, users.name, profiles.role
+    `SELECT users.id, users.email, users.name, users.role AS user_role, profiles.role
      FROM users
      LEFT JOIN profiles ON profiles.user_id = users.id
      WHERE users.id = $1`,
@@ -19,10 +19,11 @@ const loadUserProfile = async (userId) => {
 
 const normalizeRole = (user) => {
   const adminEmail = process.env.ADMIN_EMAIL || 'camila@astrolumen.com';
-  if (user.role === 'admin' && user.email !== adminEmail) {
+  const resolvedRole = user.role || user.user_role || 'user';
+  if (resolvedRole === 'admin' && user.email !== adminEmail) {
     return 'user';
   }
-  return user.role || 'user';
+  return resolvedRole;
 };
 
 const authenticate = async (req, res, next) => {

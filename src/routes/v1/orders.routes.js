@@ -4,7 +4,14 @@ const { authenticate, optionalAuth, requireAdmin } = require('../../middleware/a
 
 const router = express.Router();
 
-const allowedStatuses = new Set(['draft', 'pending', 'paid', 'cancelled', 'refunded']);
+const allowedStatuses = new Set([
+  'requested',
+  'checkout_started',
+  'paid',
+  'failed',
+  'delivered',
+  'refunded',
+]);
 
 router.post('/', optionalAuth, async (req, res) => {
   try {
@@ -30,7 +37,7 @@ router.post('/', optionalAuth, async (req, res) => {
     }
 
     const serviceResult = await db.query(
-      'SELECT id, name, price_cents FROM services WHERE id = $1 AND active = true',
+      'SELECT id, name, slug, price_cents FROM services WHERE id = $1 AND active = true',
       [serviceId]
     );
     const service = serviceResult.rows[0];
@@ -40,19 +47,21 @@ router.post('/', optionalAuth, async (req, res) => {
 
     const result = await db.query(
       `INSERT INTO orders
-      (user_id, service_id, service_type, status, amount_cents, currency, session_id, referrer, landing_page,
+      (user_id, service_id, service_slug, service_type, status, amount_cents, price, currency, session_id, referrer, landing_page,
        utm_source, utm_medium, utm_campaign, utm_content, utm_term,
        customer_name, birth_date, birth_time, birth_place_text, birth_lat, birth_lng, timezone_offset, language, notes)
       VALUES
-      ($1, $2, $3, 'draft', $4, 'BRL', $5, $6, $7,
-       $8, $9, $10, $11, $12,
-       $13, $14, $15, $16, $17, $18, $19, $20, $21)
+      ($1, $2, $3, $4, 'requested', $5, $6, 'BRL', $7, $8, $9,
+       $10, $11, $12, $13, $14,
+       $15, $16, $17, $18, $19, $20, $21, $22, $23)
       RETURNING id, status`,
       [
         req.user ? req.user.id : null,
         service.id,
+        service.slug,
         service.name,
         service.price_cents,
+        Number(service.price_cents) / 100,
         sessionId || null,
         referrer || null,
         landingPage || null,
