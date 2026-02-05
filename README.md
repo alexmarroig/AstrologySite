@@ -10,6 +10,12 @@ Este repositório contém um backend Node/Express para o AstroLumen, com conteú
 npm test
 ```
 
+Para rodar apenas o smoke test de endpoints (configurável em `tests/integration/endpoints.config.js`):
+
+```bash
+node --test tests/integration/endpoints-smoke.test.js
+```
+
 O comando usa o runner nativo do Node (`node --test`) para evitar dependências externas. Se o registry interno bloquear downloads (erro 403), configure o registry padrão:
 
 ```bash
@@ -90,6 +96,10 @@ curl -X POST http://localhost:3000/v1/orders \
 
 # resumo analytics (admin)
 curl http://localhost:3000/v1/analytics/summary?from=2025-01-01&to=2025-01-31 \
+  -H "Authorization: Bearer <token>"
+
+# atividade recente por usuário (admin)
+curl http://localhost:3000/v1/analytics/users/activity?limit=20 \
   -H "Authorization: Bearer <token>"
 ```
 

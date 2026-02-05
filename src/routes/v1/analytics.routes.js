@@ -204,6 +204,45 @@ router.get('/summary', authenticate, requireAdmin(), async (req, res) => {
   }
 });
 
+
+router.get('/users/activity', authenticate, requireAdmin(), async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 50), 200);
+    const result = await db.query(
+      `SELECT users.id AS user_id,
+              users.email,
+              users.name,
+              MAX(events.created_at) AS last_activity_at,
+              JSON_AGG(
+                JSON_BUILD_OBJECT(
+                  'event_name', events.event_name,
+                  'page_url', events.page_url,
+                  'created_at', events.created_at,
+                  'payload_json', events.payload_json
+                )
+                ORDER BY events.created_at DESC
+              ) FILTER (WHERE events.id IS NOT NULL) AS recent_events
+       FROM users
+       LEFT JOIN LATERAL (
+         SELECT id, event_name, page_url, created_at, payload_json
+         FROM analytics_events
+         WHERE user_id = users.id
+         ORDER BY created_at DESC
+         LIMIT 10
+       ) events ON true
+       GROUP BY users.id, users.email, users.name
+       ORDER BY last_activity_at DESC NULLS LAST
+       LIMIT $1`,
+      [limit]
+    );
+
+    return res.json({ users: result.rows });
+  } catch (error) {
+    console.error('Erro no activity analytics:', error);
+    return res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
 router.get('/user/:userId/timeline', authenticate, requireAdmin(), async (req, res) => {
   try {
     const { userId } = req.params;

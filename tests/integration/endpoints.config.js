@@ -1,0 +1,60 @@
+module.exports = [
+  { method: 'get', path: '/health', expected: [200] },
+  { method: 'get', path: '/openapi.json', expected: [200] },
+
+  { method: 'post', path: '/api/auth/register', body: {}, expected: [400] },
+  { method: 'post', path: '/api/auth/login', body: {}, expected: [400] },
+  { method: 'post', path: '/api/auth/refresh', body: {}, expected: [400, 401] },
+  { method: 'get', path: '/api/auth/me', expected: [401, 403] },
+
+  { method: 'get', path: '/services', expected: [200] },
+  { method: 'get', path: '/services/nao-existe', expected: [404] },
+  { method: 'get', path: '/profile', expected: [200] },
+  { method: 'get', path: '/posts', expected: [200] },
+  { method: 'get', path: '/posts/999999', expected: [404] },
+  { method: 'get', path: '/stats', expected: [200] },
+
+  { method: 'get', path: '/api/content/services', expected: [200] },
+  { method: 'get', path: '/api/content/services/nao-existe', expected: [404] },
+  { method: 'get', path: '/api/content/profile', expected: [200] },
+  { method: 'get', path: '/api/content/faq', expected: [200] },
+  { method: 'get', path: '/api/content/posts', expected: [200] },
+  { method: 'get', path: '/api/content/posts/999999', expected: [404] },
+  { method: 'get', path: '/api/content/stats', expected: [200] },
+
+  { method: 'post', path: '/api/newsletter/subscribe', body: {}, expected: [400] },
+  { method: 'post', path: '/api/payments/intent', body: {}, expected: [401] },
+  { method: 'post', path: '/api/orders', body: {}, expected: [401] },
+
+  { method: 'get', path: '/v1/services', expected: [200] },
+  { method: 'post', path: '/v1/orders', body: {}, expected: [400] },
+  { method: 'get', path: '/v1/orders/999999', auth: 'user', expected: [404] },
+  { method: 'patch', path: '/v1/orders/999999/status', auth: 'admin', body: { status: 'paid' }, expected: [404] },
+
+  { method: 'post', path: '/v1/auth/login-admin', body: {}, expected: [400] },
+
+  { method: 'post', path: '/v1/analytics/track', body: {}, expected: [400] },
+  { method: 'get', path: '/v1/analytics/summary', expected: [401] },
+  { method: 'get', path: '/v1/analytics/summary', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/analytics/users/activity', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/analytics/user/1/timeline', auth: 'admin', expected: [200] },
+
+  { method: 'post', path: '/v1/track', body: {}, expected: [400] },
+  { method: 'post', path: '/v1/identify', body: {}, expected: [400] },
+
+  { method: 'get', path: '/v1/admin/overview', expected: [401] },
+  { method: 'get', path: '/v1/admin/overview', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/funnel', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/users', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/users/1', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/orders', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/orders/999999', auth: 'admin', expected: [404] },
+  { method: 'get', path: '/v1/admin/leads', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/traffic', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/user/1/timeline', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/user/1/export', auth: 'admin', expected: [200] },
+  { method: 'delete', path: '/v1/admin/user/999999', auth: 'admin', expected: [404] },
+  { method: 'get', path: '/v1/admin/exports/users.csv', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/exports/orders.csv', auth: 'admin', expected: [200] },
+  { method: 'get', path: '/v1/admin/exports/events.csv', auth: 'admin', expected: [200] },
+];
