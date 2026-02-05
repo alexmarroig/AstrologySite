@@ -76,6 +76,24 @@ git lfs pull
 | `STRIPE_SUCCESS_URL` | URL de sucesso do checkout | `https://astrolumen.com/checkout/success` |
 | `STRIPE_CANCEL_URL` | URL de cancelamento do checkout | `https://astrolumen.com/checkout/cancel` |
 
+
+## Monitoramento inteligente e testes automatizados
+
+Foi adicionado um módulo em `app/monitoring/health_analytics.py` com componentes para:
+- prever risco de falhas (`FailurePredictor`);
+- detectar gargalos de performance em tempo real (`PerformanceMonitor`);
+- identificar anomalias em séries (`AnomalyDetector`);
+- simular comportamento de usuário para testes de UX (`UserBehaviorSimulator`);
+- analisar logs e sugerir causa raiz (`LogRootCauseAnalyzer`).
+
+Teste unitário do módulo:
+
+```bash
+pytest -q tests/test_monitoring.py
+```
+
+Também foi criada uma pipeline de regressão em `.github/workflows/ci-regression.yml` para executar testes Node e Python em matriz de versões.
+
 ## Endpoints
 
 ### Admin, Analytics, Serviços e Pedidos (Node/Express)
